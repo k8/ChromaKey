@@ -13,6 +13,7 @@ public:
 };
 
 QImage fromCvMat(const cv::Mat& mat);
-void keying(Mat& fg, Mat& bg, int eps, int eps2, QRgb color, QRgb darkColor);
+void segmentation(Mat& mat);
+void keying(Mat& fg, Mat& bg, QRgb color, int hue, int saturation, int value, bool segm);
 
 #endif // IMAGE_H

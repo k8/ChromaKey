@@ -1,5 +1,6 @@
 #include "image.h"
 #include <QDebug>
+#include <QColor>
 
 Image::Image()
 {
@@ -21,50 +22,55 @@ QImage fromCvMat(const cv::Mat& mat)
     }
 }
 
-void keying(Mat& fg, Mat& bg, int eps, int eps2, QRgb color, QRgb darkColor)
+void segmentation(Mat &in)
 {
-  int b = 165;
-  int g = 170;
-  int r = 43;
+    Mat image;
+    cvtColor(in, image, CV_BGR2HSV);
+    for (int i=0; i<image.rows; i++)
+    {
+      for (int j=0; j<image.cols; j++)
+      {
+          Vec3b& hsvElem = image.at<Vec3b>(i,j);
+          hsvElem[0] = hsvElem[0]/10*10;
+          hsvElem[1] = hsvElem[1]/80*80;
+          hsvElem[2] = hsvElem[1]/80*80;
+      }
+    }
+    cvtColor(image, in, CV_HSV2BGR);
+}
 
-//  int miniB = 136;
-//  int miniG = 141;
-//  int miniR = 23;
-
-  int miniB = qBlue(color);
-  int miniG = qGreen(color);
-  int miniR = qRed(color);
-
-//  int maxiB = 182;
-//  int maxiG = 188;
-//  int maxiR = 61;
-
-  int maxiB = qBlue(darkColor);
-  int maxiG = qGreen(darkColor);
-  int maxiR = qRed(darkColor);
-
-  double scaleFact = (double)bg.cols/fg.cols;
-  int width = fg.cols*scaleFact;
-  int height = fg.rows*scaleFact;
-  Mat image;
-  resize(fg, image, Size(width, height));
-  Mat mask = Mat::ones(image.rows, image.cols, CV_8UC1);
-  for (int i=0; i<image.rows; i++)
-  {
+void keying(Mat &fg, Mat &bg, QRgb color, int hue, int saturation, int value, bool segm)
+{
+    if (segm)
+        segmentation(fg);
+    double scaleFact = (double)bg.cols/fg.cols;
+    int width = fg.cols*scaleFact;
+    int height = fg.rows*scaleFact;
+    Mat image;
+    resize(fg, image, Size(width, height));
+    Mat mask = Mat::ones(image.rows, image.cols, CV_8UC1);
+    QColor col(color);
+    col.toHsv();
+    int h = col.hue();
+    int s = col.saturation();
+    int v = col.value();
+    Mat imgHSV;
+    cvtColor(image, imgHSV, CV_BGR2HSV);
+    for (int i=0; i<image.rows; i++)
+    {
     for (int j=0; j<image.cols; j++)
     {
       {
-        Vec3b& elem = image.at<Vec3b>(i,j);
-//	int alpha = elem[0]-elem[1]/2.0-elem[2]/2.0;
-//	if (alpha < 0)
-//        if (!(abs(elem[0]-b) < eps && abs(elem[1]-g) < eps && abs(elem[2]-r) < eps))
-        if ((abs(elem[0]-miniB) < eps && abs(elem[1]-miniG) < eps && abs(elem[2]-miniR) < eps) || (abs(elem[0]-maxiB) < eps2 && abs(elem[1]-maxiG) < eps2 && abs(elem[2]-maxiR) < eps2))
+        Vec3b& elem = imgHSV.at<Vec3b>(i,j);
+        if ((abs(elem[0]*2-h) < hue &&
+             abs(elem[1]-s) < saturation &&
+             abs(elem[2]-v) < value))
         {
           mask.at<uchar>(i,j) = 0;
         }
       }
     }
-  }
-  Mat roi(bg, Rect(bg.cols-image.cols, bg.rows-image.rows, image.cols, image.rows));
-  image.copyTo(roi, mask);
+    }
+    Mat roi(bg, Rect(bg.cols-image.cols, bg.rows-image.rows, image.cols, image.rows));
+    image.copyTo(roi, mask);
 }

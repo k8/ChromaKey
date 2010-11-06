@@ -3,7 +3,8 @@
 #include <QDebug>
 
 MovieThread::MovieThread()
-    : tolerance(0), darkTolerance(0), color(0), darkColor(0), stopped(false), play(true)
+    : stopped(false), play(true),
+    color(0), hue(0), saturation(0), value(0),  segmentation(false)
 {
 }
 
@@ -24,28 +25,35 @@ void MovieThread::stop()
     play = true;
 }
 
-void MovieThread::setTolerance(int t)
-{
-    QMutexLocker locker(&mutex);
-    tolerance = t;
-}
-
-void MovieThread::setDarkTolerance(int t)
-{
-    QMutexLocker locker(&mutex);
-    darkTolerance = t;
-}
-
 void MovieThread::setColor(QRgb c)
 {
     QMutexLocker locker(&mutex);
     color = c;
 }
 
-void MovieThread::setDarkColor(QRgb c)
+void MovieThread::setHue(int h)
 {
     QMutexLocker locker(&mutex);
-    darkColor = c;
+    hue = h;
+}
+
+
+void MovieThread::setSaturation(int s)
+{
+    QMutexLocker locker(&mutex);
+    saturation = s;
+}
+
+void MovieThread::setValue(int v)
+{
+    QMutexLocker locker(&mutex);
+    value = v;
+}
+
+void MovieThread::setSegmentaion(bool s)
+{
+    QMutexLocker locker(&mutex);
+    segmentation = s;
 }
 
 bool MovieThread::paused()
@@ -77,19 +85,20 @@ void MovieThread::run()
         Mat bgFrame;
         if (fgCapture.grab() && fgCapture.retrieve(fgFrame) && bgCapture.grab() &&bgCapture.retrieve(bgFrame))
         {
-            int next = true;
+            int next = true;                        
             do
             {
                 Mat a, b;
                 fgFrame.copyTo(a);
                 bgFrame.copyTo(b);
                 mutex.lock();
-                int t1 = tolerance;
-                int t2 = darkTolerance;
-                int c1 = color;
-                int c2 = darkColor;
+                int c = color;
+                int h = hue;
+                int s = saturation;
+                int v = value;
+                bool segm = segmentation;
                 mutex.unlock();
-                keying(a, b, t1, t2, c1, c2);
+                keying(a, b, c, h, s, v, segm);
                 emit frameReady(fromCvMat(b));
                 usleep(30000);                
                 mutex.lock();

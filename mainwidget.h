@@ -24,11 +24,8 @@ protected slots:
 private:
     Ui::MainWidget *ui;
     MovieThread movieThread;
-    bool darkColor;
 
 private slots:
-    void on_darkColorButton_toggled(bool checked);
-    void on_colorButton_toggled(bool checked);
     void on_playPauseButton_clicked();
 };
 

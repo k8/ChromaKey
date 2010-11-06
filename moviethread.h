@@ -21,10 +21,11 @@ public:
 
 
 public slots:
-    void setTolerance(int t);
-    void setDarkTolerance(int t);
     void setColor(QRgb c);
-    void setDarkColor(QRgb c);
+    void setHue(int h);
+    void setSaturation(int s);
+    void setValue(int v);
+    void setSegmentaion(bool s);
 
 signals:
     void frameReady(const QImage&);
@@ -35,14 +36,15 @@ protected:
 private:
     QMutex mutex;
     QWaitCondition pauseContition;
-    cv::VideoCapture fgCapture;
-    cv::VideoCapture bgCapture;
-    int tolerance;
-    int darkTolerance;
-    QRgb color;
-    QRgb darkColor;
     bool stopped;
     bool play;
+    cv::VideoCapture fgCapture;
+    cv::VideoCapture bgCapture;
+    QRgb color;
+    int hue;
+    int saturation;
+    int value;
+    bool segmentation;
 };
 
 #endif // MOVIETHREAD_H
