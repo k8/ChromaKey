@@ -2,16 +2,12 @@
 #include <QDebug>
 #include <QColor>
 
-Image::Image()
-{
-}
-
-QImage fromCvMat(const cv::Mat& mat)
+QImage fromCvMat(const Mat& mat)
 {
     if(mat.channels()==1)
     {
-        cv::Mat m;
-        cv::cvtColor(mat, m, CV_GRAY2RGB);
+        Mat m;
+        cvtColor(mat, m, CV_GRAY2RGB);
         QImage img(m.data, m.size().width, m.size().height, m.step, QImage::Format_RGB888);
         return img.copy(0,0,img.width(),img.height());
     }
@@ -39,15 +35,15 @@ void segmentation(Mat &in)
     cvtColor(image, in, CV_HSV2BGR);
 }
 
-void keying(Mat &fg, Mat &bg, QRgb color, int hue, int saturation, int value, bool segm)
-{
-    if (segm)
-        segmentation(fg);
+void keying(const Mat &fg, const Mat &bg, Mat& out, QRgb color, int hue, int saturation, int value, bool segm)
+{    
     double scaleFact = (double)bg.cols/fg.cols;
     int width = fg.cols*scaleFact;
     int height = fg.rows*scaleFact;
     Mat image;
     resize(fg, image, Size(width, height));
+    if (segm)
+        segmentation(image);
     Mat mask = Mat::ones(image.rows, image.cols, CV_8UC1);
     QColor col(color);
     col.toHsv();
@@ -71,6 +67,7 @@ void keying(Mat &fg, Mat &bg, QRgb color, int hue, int saturation, int value, bo
       }
     }
     }
-    Mat roi(bg, Rect(bg.cols-image.cols, bg.rows-image.rows, image.cols, image.rows));
+    bg.copyTo(out);
+    Mat roi(out, Rect(out.cols-image.cols, out.rows-image.rows, image.cols, image.rows));
     image.copyTo(roi, mask);
 }

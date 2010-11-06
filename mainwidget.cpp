@@ -9,8 +9,8 @@ MainWidget::MainWidget(QWidget *parent) :
     ui->setupUi(this);
     ui->colorLabel->setPalette(QPalette(QColor(0, 0, 0)));
     movieThread.openForegroundMovie("input.avi");
-//    movieThread.openForegroundMovie("../chroma_key/ChromaKey/DSC_0007.AVI");
-    movieThread.openBackgroundMovie("new_york.avi");
+    movieThread.openBackgroundMovie("../chroma_key/ChromaKey/DSC_0007.AVI");
+//    movieThread.openBackgroundMovie("new_york.avi");
     connect(&movieThread, SIGNAL(frameReady(const QImage&)), this, SLOT(prepareFrame(const QImage&)));
     connect(ui->movieLabel, SIGNAL(colorChanged(QRgb)), this, SLOT(changeColor(QRgb)));
     connect(ui->segmentationCheck, SIGNAL(toggled(bool)), &movieThread, SLOT(setSegmentaion(bool)));

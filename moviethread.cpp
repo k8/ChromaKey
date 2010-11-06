@@ -1,11 +1,13 @@
 #include "moviethread.h"
 #include <QMutexLocker>
 #include <QDebug>
+#include <QTime>
 
 MovieThread::MovieThread()
     : stopped(false), play(true),
-    color(0), hue(0), saturation(0), value(0),  segmentation(false)
+    hue(0), saturation(0), value(0),  segmentation(false)
 {
+    color = qRgb(0, 0, 0);
 }
 
 bool MovieThread::openForegroundMovie(const QString &file)
@@ -21,6 +23,7 @@ bool MovieThread::openBackgroundMovie(const QString &file)
 void MovieThread::stop()
 {
     QMutexLocker locker(&mutex);
+    pauseContition.wakeAll();
     stopped = true;
     play = true;
 }
@@ -29,12 +32,14 @@ void MovieThread::setColor(QRgb c)
 {
     QMutexLocker locker(&mutex);
     color = c;
+    pauseContition.wakeAll();
 }
 
 void MovieThread::setHue(int h)
 {
     QMutexLocker locker(&mutex);
     hue = h;
+    pauseContition.wakeAll();
 }
 
 
@@ -42,55 +47,61 @@ void MovieThread::setSaturation(int s)
 {
     QMutexLocker locker(&mutex);
     saturation = s;
+    pauseContition.wakeAll();
 }
 
 void MovieThread::setValue(int v)
 {
     QMutexLocker locker(&mutex);
     value = v;
+    pauseContition.wakeAll();
 }
 
 void MovieThread::setSegmentaion(bool s)
 {
     QMutexLocker locker(&mutex);
     segmentation = s;
+    pauseContition.wakeAll();
 }
 
 bool MovieThread::paused()
 {
     QMutexLocker locker(&mutex);
+    play = !play;
     if (play)
-    {
-        play = false;
-    }
-    else
-    {
-        play = true;
-        //pauseContition.wakeAll();
-    }
-    return ! play;
+        pauseContition.wakeAll();
+    return !play;
 }
 
 void MovieThread::run()
 {
     using namespace cv;
+    double frameTime = 1000/fgCapture.get(CV_CAP_PROP_FPS);
+    QTime time;
+    int waitTime = frameTime;
     while (! stopped)
     {
-//        while (!play)
-//        {
-//            QMutexLocker locker(&mutex);
-//            pauseContition.wait(&mutex);
-//        }
         Mat fgFrame;
         Mat bgFrame;
+        if (waitTime < 0)
+        {
+            for (int i = 0; i <= abs(waitTime)/frameTime; i++)
+            {
+                fgCapture >> fgFrame;
+                bgCapture >> bgFrame;
+            }
+        }
         if (fgCapture.grab() && fgCapture.retrieve(fgFrame) && bgCapture.grab() &&bgCapture.retrieve(bgFrame))
         {
-            int next = true;                        
             do
             {
-                Mat a, b;
-                fgFrame.copyTo(a);
-                bgFrame.copyTo(b);
+                if (! play)
+                {
+                    QMutexLocker locker(&mutex);
+                    pauseContition.wait(&mutex);
+                }
+                time.restart();
+                Mat outFrame;
                 mutex.lock();
                 int c = color;
                 int h = hue;
@@ -98,14 +109,14 @@ void MovieThread::run()
                 int v = value;
                 bool segm = segmentation;
                 mutex.unlock();
-                keying(a, b, c, h, s, v, segm);
-                emit frameReady(fromCvMat(b));
-                usleep(30000);                
-                mutex.lock();
-                next = play;
-                mutex.unlock();
+                keying(fgFrame, bgFrame, outFrame, c, h, s, v, segm);
+                emit frameReady(fromCvMat(outFrame));
+                qDebug() << time.elapsed();
+                waitTime = frameTime-time.elapsed();
+                if (waitTime > 0)
+                    usleep(waitTime*1000);
             }
-            while (! next);
+            while (! play);
         }
         else
         {

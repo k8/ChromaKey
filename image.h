@@ -6,14 +6,8 @@
 #include <opencv/highgui.h>
 using namespace cv;
 
-class Image : public QImage
-{
-public:
-    Image();
-};
-
-QImage fromCvMat(const cv::Mat& mat);
-void segmentation(Mat& mat);
-void keying(Mat& fg, Mat& bg, QRgb color, int hue, int saturation, int value, bool segm);
+QImage fromCvMat(const Mat& mat);
+void segmentation(Mat& in);
+void keying(const Mat& fg, const Mat& bg, Mat& out, QRgb color, int hue, int saturation, int value, bool segm);
 
 #endif // IMAGE_H
