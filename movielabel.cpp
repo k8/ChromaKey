@@ -12,7 +12,13 @@ void MovieLabel::paintEvent(QPaintEvent * event)
 {
     const QPixmap* pix = pixmap();
     if (pix)
-        setMaximumSize(pix->width(), pix->height());
+    {
+        if (minimumWidth() < pix->width() && maximumHeight() < pix->height())
+        {
+            setMinimumSize(pix->size());
+            setMaximumSize(pix->size());
+        }
+    }    
     QLabel::paintEvent(event);
 }
 

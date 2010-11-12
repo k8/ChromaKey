@@ -7,6 +7,7 @@
 using namespace cv;
 
 QImage fromCvMat(const Mat& mat);
+void fill(Mat& mat, QRgb color);
 void segmentation(Mat& in);
 void keying(const Mat& fg, const Mat& bg, Mat& out, QRgb color, int hue, int saturation, int value, bool segm);
 

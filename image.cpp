@@ -18,6 +18,20 @@ QImage fromCvMat(const Mat& mat)
     }
 }
 
+void fill(Mat &image, QRgb color)
+{
+    for (int i=0; i<image.rows; i++)
+    {
+      for (int j=0; j<image.cols; j++)
+      {
+          Vec3b& elem = image.at<Vec3b>(i,j);
+          elem[0] = qBlue(color);
+          elem[1] = qGreen(color);
+          elem[2] = qRed(color);
+      }
+  }
+}
+
 void segmentation(Mat &in)
 {
     Mat image;
@@ -44,7 +58,10 @@ void keying(const Mat &fg, const Mat &bg, Mat& out, QRgb color, int hue, int sat
     resize(fg, image, Size(width, height));
     if (segm)
         segmentation(image);
+    Mat blur;
+    GaussianBlur(image, blur, Size(13, 13), 1.5, 1.5);
     Mat mask = Mat::ones(image.rows, image.cols, CV_8UC1);
+    blur = image-blur;
     QColor col(color);
     col.toHsv();
     int h = col.hue();
@@ -54,18 +71,18 @@ void keying(const Mat &fg, const Mat &bg, Mat& out, QRgb color, int hue, int sat
     cvtColor(image, imgHSV, CV_BGR2HSV);
     for (int i=0; i<image.rows; i++)
     {
-    for (int j=0; j<image.cols; j++)
-    {
-      {
-        Vec3b& elem = imgHSV.at<Vec3b>(i,j);
-        if ((abs(elem[0]*2-h) < hue &&
-             abs(elem[1]-s) < saturation &&
-             abs(elem[2]-v) < value))
+        for (int j=0; j<image.cols; j++)
         {
-          mask.at<uchar>(i,j) = 0;
+          {                          
+            Vec3b& elem = imgHSV.at<Vec3b>(i,j);
+            if ((abs(elem[0]*2-h) < hue &&
+                 abs(elem[1]-s) < saturation &&
+                 abs(elem[2]-v) < value))
+            {
+              mask.at<uchar>(i,j) = 0;
+            }
+          }
         }
-      }
-    }
     }
     bg.copyTo(out);
     Mat roi(out, Rect(out.cols-image.cols, out.rows-image.rows, image.cols, image.rows));

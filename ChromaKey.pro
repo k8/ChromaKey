@@ -5,14 +5,19 @@ TARGET = ChromaKey
 TEMPLATE = app
 SOURCES += main.cpp \
     mainwidget.cpp \
-    moviethread.cpp \
+    keyingthread.cpp \
     image.cpp \
-    movielabel.cpp
+    movielabel.cpp \
+    mainwindow.cpp \
+    imagessupplier.cpp
 HEADERS += mainwidget.h \
-    moviethread.h \
+    keyingthread.h \
     image.h \
-    movielabel.h
-FORMS += mainwidget.ui
+    movielabel.h \
+    mainwindow.h \
+    imagessupplier.h
+FORMS += mainwidget.ui \
+    mainwindow.ui
 CONFIG += link_pkgconfig
 PKGCONFIG += --cflags \
     opencv \
