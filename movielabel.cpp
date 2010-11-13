@@ -24,10 +24,13 @@ void MovieLabel::paintEvent(QPaintEvent * event)
 
 void MovieLabel::mousePressEvent(QMouseEvent *ev)
 {
+    qDebug() << width() << height();
     const QPixmap* pix = pixmap();
     if (pix)
     {
-        QRgb color = pix->toImage().pixel(ev->pos());
+        double factX = (double)pix->width()/width();
+        double factY = (double)pix->height()/height();
+        QRgb color = pix->toImage().pixel(ev->x()*factX, ev->y()*factY);
         emit colorChanged(color);
     }
 }

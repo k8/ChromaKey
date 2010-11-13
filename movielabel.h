@@ -8,7 +8,7 @@ class MovieLabel : public QLabel
 {
     Q_OBJECT
 public:
-    MovieLabel(QWidget* parent);
+    MovieLabel(QWidget* parent);   
 
 signals:
     void colorChanged(QRgb color);

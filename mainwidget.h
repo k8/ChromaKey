@@ -15,13 +15,14 @@ class MainWidget : public QWidget {
 public:
     MainWidget(QWidget *parent = 0);
     ~MainWidget();
-    void init(ImagesSupplier* is);
     void setForegroundIcon(const QImage& img);
     void setBackgroundIcon(const QImage& img);
     void updateMovieLabel();
 
 protected:
     void changeEvent(QEvent *e);
+    void pause();
+    void play();
 
 protected slots:
     void prepareFrame(const QImage& frame);
@@ -35,6 +36,9 @@ private:
     QTime time;
 
 private slots:
+    void on_colorButton_clicked();
+    void on_bgButton_clicked();
+    void on_fgButton_clicked();
     void on_playPauseButton_clicked();
 };
 

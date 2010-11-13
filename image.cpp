@@ -32,6 +32,37 @@ void fill(Mat &image, QRgb color)
   }
 }
 
+void resize(const Mat &mat, Mat &out, double fact)
+{
+    if (fact == 1)
+        return;
+    int width = mat.cols*fact;
+    int height = mat.rows*fact;
+    resize(mat, out, Size(width, height));
+}
+
+void prepareSize(const Mat &a, const Mat &b, Mat &aout, Mat &bout)
+{
+    b.copyTo(bout);
+    if (a.cols <= b.cols && a.rows <= b.rows)
+    {
+        double widthFact = (double)a.cols/(b.cols);
+        double heightFact = (double)a.rows/(b.rows);
+        resize(b, bout, max(widthFact, heightFact));
+    }
+    Mat a2;
+    a.copyTo(a2);
+    if (a.cols > bout.cols)
+    {
+        resize(a, a2, (double)bout.cols/a.cols);
+    }
+    a2.copyTo(aout);
+    if (a2.rows > bout.rows)
+    {
+        resize(a2, aout, (double)bout.rows/a2.rows);
+    }
+}
+
 void segmentation(Mat &in)
 {
     Mat image;
@@ -51,11 +82,11 @@ void segmentation(Mat &in)
 
 void keying(const Mat &fg, const Mat &bg, Mat& out, QRgb color, int hue, int saturation, int value, bool segm)
 {    
-    double scaleFact = (double)bg.cols/fg.cols;
-    int width = fg.cols*scaleFact;
-    int height = fg.rows*scaleFact;
+    Mat a;
+    Mat b;
+    prepareSize(fg, bg, a, b);
     Mat image;
-    resize(fg, image, Size(width, height));
+    a.copyTo(image);
     if (segm)
         segmentation(image);
     Mat blur;
@@ -84,7 +115,8 @@ void keying(const Mat &fg, const Mat &bg, Mat& out, QRgb color, int hue, int sat
           }
         }
     }
-    bg.copyTo(out);
-    Mat roi(out, Rect(out.cols-image.cols, out.rows-image.rows, image.cols, image.rows));
+    b.copyTo(out);
+    Rect r(out.cols-image.cols, out.rows-image.rows, image.cols, image.rows);
+    Mat roi(out, r);
     image.copyTo(roi, mask);
 }

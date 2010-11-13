@@ -8,16 +8,13 @@ SOURCES += main.cpp \
     keyingthread.cpp \
     image.cpp \
     movielabel.cpp \
-    mainwindow.cpp \
     imagessupplier.cpp
 HEADERS += mainwidget.h \
     keyingthread.h \
     image.h \
     movielabel.h \
-    mainwindow.h \
     imagessupplier.h
-FORMS += mainwidget.ui \
-    mainwindow.ui
+FORMS += mainwidget.ui
 CONFIG += link_pkgconfig
 PKGCONFIG += --cflags \
     opencv \

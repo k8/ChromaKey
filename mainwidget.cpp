@@ -3,6 +3,9 @@
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QPixmap>
+#include <QFileDialog>
+#include <QColorDialog>
+#include <QColor>
 
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
@@ -10,25 +13,16 @@ MainWidget::MainWidget(QWidget *parent) :
 {
     ui->setupUi(this);    
     ui->playPauseButton->setDisabled(true);
-}
-
-MainWidget::~MainWidget()
-{
-    keyingThread->stop();
-    keyingThread->wait();
-    delete ui;
-}
-
-void MainWidget::init(ImagesSupplier* is)
-{
-    imagesSupplier = is;
-    keyingThread = new KeyingThread(is);    
-    ui->colorLabel->setPalette(QPalette(Qt::white));
+    imagesSupplier = new ImagesSupplier();
+    keyingThread = new KeyingThread(imagesSupplier);
+    ui->colorButton->setPalette(QPalette(Qt::white));
     setForegroundIcon(imagesSupplier->getForegroundIcon());
     setBackgroundIcon(imagesSupplier->getBackgroundIcon());
     QPixmap pix(ui->movieLabel->width(), ui->movieLabel->height());
     pix.fill();
     ui->movieLabel->setPixmap(pix);
+    changeColor(qRgb(255, 255, 255));
+//    ui->colorButton->setDisabled(true);
     connect(keyingThread, SIGNAL(frameReady(const QImage&)), this, SLOT(prepareFrame(const QImage&)));
     connect(ui->movieLabel, SIGNAL(colorChanged(QRgb)), this, SLOT(changeColor(QRgb)));
     connect(ui->segmentationCheck, SIGNAL(toggled(bool)), keyingThread, SLOT(setSegmentaion(bool)));
@@ -40,14 +34,23 @@ void MainWidget::init(ImagesSupplier* is)
     time.start();
 }
 
+MainWidget::~MainWidget()
+{
+    keyingThread->stop();
+    keyingThread->wait();
+    delete imagesSupplier;
+    delete keyingThread;
+    delete ui;
+}
+
 void MainWidget::setForegroundIcon(const QImage& img)
 {
-    ui->fgLabel->setPixmap(QPixmap::fromImage(img));
+    ui->fgButton->setIcon(QPixmap::fromImage(img));
 }
 
 void MainWidget::setBackgroundIcon(const QImage& img)
 {
-    ui->bgLabel->setPixmap(QPixmap::fromImage(img));
+    ui->bgButton->setIcon(QPixmap::fromImage(img));
 }
 
 void MainWidget::updateMovieLabel()
@@ -65,7 +68,9 @@ void MainWidget::updateMovieLabel()
 
 void MainWidget::changeColor(QRgb color)
 {
-    ui->colorLabel->setPalette(QColor(color));
+    QPixmap pix(ui->colorButton->width(), ui->colorButton->height());
+    pix.fill(QColor(color));
+    ui->colorButton->setIcon(pix);;
     keyingThread->setColor(color);
 }
 
@@ -86,6 +91,18 @@ void MainWidget::changeEvent(QEvent *e)
     }
 }
 
+void MainWidget::pause()
+{
+    keyingThread->pause();
+    ui->playPauseButton->setText("Play");
+}
+
+void MainWidget::play()
+{
+    keyingThread->play();
+    ui->playPauseButton->setText("Pause");
+}
+
 void MainWidget::prepareFrame(const QImage &frame)
 {
     ui->movieLabel->setPixmap(QPixmap::fromImage(frame));
@@ -93,23 +110,60 @@ void MainWidget::prepareFrame(const QImage &frame)
 
 void MainWidget::on_playPauseButton_clicked()
 {
-    QString text = "Pause";
-    if (!keyingThread->isRunning())
+//    if (!keyingThread->isRunning())
+//    {
+//        keyingThread->start();
+//        time.start();
+//    }
+    if (keyingThread->isPaused())
     {
-        keyingThread->start();
-        time.start();
+        play();
     }
     else
     {
-        if (keyingThread->isPaused())
+        pause();
+    }
+}
+
+void MainWidget::on_fgButton_clicked()
+{    
+    QString file = QFileDialog::getOpenFileName(this, "Open foreground file", QDir::currentPath(), "Movies (*.avi);;Images (*.jpg)");
+    if (file != QString())
+    {
+        if (file.contains(".avi"))
         {
-            keyingThread->play();
+            imagesSupplier->openForegroundMovie(file);
         }
         else
         {
-            keyingThread->pause();
-            text = "Play";
+            imagesSupplier->openForegroundImage(file);
         }
+        setForegroundIcon(imagesSupplier->getForegroundIcon());
+        updateMovieLabel();
     }
-    ui->playPauseButton->setText(text);
+}
+
+void MainWidget::on_bgButton_clicked()
+{
+    QString file = QFileDialog::getOpenFileName(this, "Open background file", QDir::currentPath(), "Movies (*.avi);;Images (*.jpg)");
+    if (file != QString())
+    {
+        if (file.contains(".avi"))
+        {
+            imagesSupplier->openBackgroundMovie(file);
+        }
+        else
+        {
+            imagesSupplier->openBackgroundImage(file);
+        }
+        setBackgroundIcon(imagesSupplier->getBackgroundIcon());
+        updateMovieLabel();
+
+    }
+}
+
+void MainWidget::on_colorButton_clicked()
+{
+    QColor color = QColorDialog::getColor(keyingThread->getColor());
+    changeColor(color.rgb());
 }
