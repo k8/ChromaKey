@@ -23,6 +23,8 @@ protected:
     void changeEvent(QEvent *e);
     void pause();
     void play();
+    void showFailMessage(const QString& text);
+    void showOpenFailMessage(const QString& file);
 
 protected slots:
     void prepareFrame(const QImage& frame);

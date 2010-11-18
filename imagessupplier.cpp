@@ -1,5 +1,7 @@
 #include "imagessupplier.h"
 #include "image.h"
+#include <QDebug>
+#include <QMutexLocker>
 
 ImagesSupplier::ImagesSupplier()
     : fgIsMovie(false), bgIsMovie(false), frameTime(1)
@@ -12,39 +14,68 @@ ImagesSupplier::ImagesSupplier()
 
 bool ImagesSupplier::openForegroundMovie(const QString &file)
 {
-    bool opened = fgCapture.open(file.toStdString());
-    frameTime = 1000/fgCapture.get(CV_CAP_PROP_FPS);
-    getFrame(fgCapture, fgImage);
-    fgIsMovie = true;
+    QMutexLocker locker(&mutex);
+    VideoCapture capture;
+    bool opened = capture.open(file.toStdString());
+    if (opened)
+    {
+        frameTime = 1000/capture.get(CV_CAP_PROP_FPS);
+        getFrame(capture, fgImage);
+        fgIsMovie = true;
+        fgCapture = capture;
+    }
     return opened;
 }
 
 bool ImagesSupplier::openBackgroundMovie(const QString &file)
 {
-    if (frameTime == 1)
-        frameTime = 1000/bgCapture.get(CV_CAP_PROP_FPS);
-    bool opened = bgCapture.open(file.toStdString());
-    getFrame(bgCapture, bgImage);
-    bgIsMovie = true;
+    QMutexLocker locker(&mutex);
+    VideoCapture capture;
+    bool opened = capture.open(file.toStdString());
+    if (opened)
+    {
+        if (frameTime == 1)
+            frameTime = 1000/capture.get(CV_CAP_PROP_FPS);
+        getFrame(capture, bgImage);
+        bgIsMovie = true;
+        bgCapture = capture;
+    }
     return opened;
 }
 
 bool ImagesSupplier::openForegroundImage(const QString &file)
 {
-    fgImage = imread(file.toStdString());
-    fgIsMovie = false;
-    return true;
+    QMutexLocker locker(&mutex);
+    bool opened = true;
+    Mat img = imread(file.toStdString());
+    if (img.data == NULL)
+        opened = false;
+    else
+    {
+        fgImage = img;
+        fgIsMovie = false;
+    }
+    return opened;
 }
 
 bool ImagesSupplier::openBackgroundImage(const QString &file)
 {
-    bgImage = imread(file.toStdString());
-    bgIsMovie = false;
+    QMutexLocker locker(&mutex);
+    bool opened = true;
+    Mat img = imread(file.toStdString());
+    if (img.data == NULL)
+        opened = false;
+    else
+    {
+        bgImage = img;
+        bgIsMovie = false;
+    }
     return true;
 }
 
 const Mat& ImagesSupplier::getForegroundImage(bool isPaused)
 {
+    QMutexLocker locker(&mutex);
     if (fgIsMovie && ! isPaused)
     {
         getFrame(fgCapture, fgImage);
@@ -54,6 +85,7 @@ const Mat& ImagesSupplier::getForegroundImage(bool isPaused)
 
 const Mat& ImagesSupplier::getBackgroundImage(bool isPaused)
 {
+    QMutexLocker locker(&mutex);
     if (bgIsMovie && ! isPaused)
     {
         getFrame(bgCapture, bgImage);
@@ -63,21 +95,24 @@ const Mat& ImagesSupplier::getBackgroundImage(bool isPaused)
 
 double ImagesSupplier::getFrameTime()
 {
+    QMutexLocker locker(&mutex);
     return frameTime;
 }
 
 void ImagesSupplier::cutFrames(int n)
 {
+    QMutexLocker locker(&mutex);
     for (int i = 0; i < n; i++)
     {
         Mat frame;
-        fgCapture >> frame;
-        bgCapture >> frame;
+        getFrame(fgCapture, frame);
+        getFrame(bgCapture, frame);
     }
 }
 
 QImage ImagesSupplier::getForegroundIcon()
 {
+    QMutexLocker locker(&mutex);
     Mat icon;
     resize(fgImage, icon, Size(50, 50));
     return fromCvMat(icon);
@@ -85,6 +120,7 @@ QImage ImagesSupplier::getForegroundIcon()
 
 QImage ImagesSupplier::getBackgroundIcon()
 {
+    QMutexLocker locker(&mutex);
     Mat icon;
     resize(bgImage, icon, Size(50, 50));
     return fromCvMat(icon);
@@ -92,12 +128,20 @@ QImage ImagesSupplier::getBackgroundIcon()
 
 bool ImagesSupplier::isMovie()
 {
+    QMutexLocker locker(&mutex);
     return fgIsMovie || bgIsMovie;
 }
 
 void ImagesSupplier::getFrame(VideoCapture &cap, Mat &mat)
 {
     Mat frame;
-    if (cap.grab() && cap.retrieve(frame))
-        frame.copyTo(mat);
+    try
+    {
+        if (cap.grab() && cap.retrieve(frame))
+            frame.copyTo(mat);
+    }
+    catch (cv::Exception& e )
+    {
+        qDebug() << e.what();
+    }
 }

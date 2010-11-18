@@ -5,6 +5,7 @@
 #include <QImage>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <QMutex>
 using namespace cv;
 
 class ImagesSupplier : public QObject
@@ -26,6 +27,7 @@ public:
 private:
     void getFrame(VideoCapture& cap, Mat& mat);
 
+    QMutex mutex;
     double frameTime;
     VideoCapture fgCapture;
     VideoCapture bgCapture;

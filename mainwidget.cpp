@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QColor>
+#include <QMessageBox>
 
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
@@ -22,7 +23,6 @@ MainWidget::MainWidget(QWidget *parent) :
     pix.fill();
     ui->movieLabel->setPixmap(pix);
     changeColor(qRgb(255, 255, 255));
-//    ui->colorButton->setDisabled(true);
     connect(keyingThread, SIGNAL(frameReady(const QImage&)), this, SLOT(prepareFrame(const QImage&)));
     connect(ui->movieLabel, SIGNAL(colorChanged(QRgb)), this, SLOT(changeColor(QRgb)));
     connect(ui->segmentationCheck, SIGNAL(toggled(bool)), keyingThread, SLOT(setSegmentaion(bool)));
@@ -103,6 +103,19 @@ void MainWidget::play()
     ui->playPauseButton->setText("Pause");
 }
 
+void MainWidget::showFailMessage(const QString &text)
+{
+    QMessageBox msgBox;
+    msgBox.setText(text);
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.exec();
+}
+
+void MainWidget::showOpenFailMessage(const QString &file)
+{
+    showFailMessage("Failed to open file "+file+".");
+}
+
 void MainWidget::prepareFrame(const QImage &frame)
 {
     ui->movieLabel->setPixmap(QPixmap::fromImage(frame));
@@ -132,11 +145,13 @@ void MainWidget::on_fgButton_clicked()
     {
         if (file.contains(".avi"))
         {
-            imagesSupplier->openForegroundMovie(file);
+            if (! imagesSupplier->openForegroundMovie(file))
+                showOpenFailMessage(file);
         }
         else
         {
-            imagesSupplier->openForegroundImage(file);
+            if (! imagesSupplier->openForegroundImage(file))
+                showOpenFailMessage(file);
         }
         setForegroundIcon(imagesSupplier->getForegroundIcon());
         updateMovieLabel();
@@ -150,11 +165,13 @@ void MainWidget::on_bgButton_clicked()
     {
         if (file.contains(".avi"))
         {
-            imagesSupplier->openBackgroundMovie(file);
+            if (! imagesSupplier->openBackgroundMovie(file))
+                showOpenFailMessage(file);
         }
         else
         {
-            imagesSupplier->openBackgroundImage(file);
+            if (! imagesSupplier->openBackgroundImage(file))
+                showOpenFailMessage(file);
         }
         setBackgroundIcon(imagesSupplier->getBackgroundIcon());
         updateMovieLabel();
