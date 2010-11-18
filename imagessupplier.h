@@ -26,6 +26,8 @@ public:
 
 private:
     void getFrame(VideoCapture& cap, Mat& mat);
+    bool openImage(const QString file, Mat& image);
+    bool openMovie(const QString file, VideoCapture& capture);
 
     QMutex mutex;
     double frameTime;

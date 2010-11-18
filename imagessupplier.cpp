@@ -15,14 +15,12 @@ ImagesSupplier::ImagesSupplier()
 bool ImagesSupplier::openForegroundMovie(const QString &file)
 {
     QMutexLocker locker(&mutex);
-    VideoCapture capture;
-    bool opened = capture.open(file.toStdString());
+    bool opened = openMovie(file, fgCapture);
     if (opened)
     {
-        frameTime = 1000/capture.get(CV_CAP_PROP_FPS);
-        getFrame(capture, fgImage);
+        frameTime = 1000/fgCapture.get(CV_CAP_PROP_FPS);
+        getFrame(fgCapture, fgImage);
         fgIsMovie = true;
-        fgCapture = capture;
     }
     return opened;
 }
@@ -30,15 +28,13 @@ bool ImagesSupplier::openForegroundMovie(const QString &file)
 bool ImagesSupplier::openBackgroundMovie(const QString &file)
 {
     QMutexLocker locker(&mutex);
-    VideoCapture capture;
-    bool opened = capture.open(file.toStdString());
+    bool opened = openMovie(file, bgCapture);
     if (opened)
     {
         if (frameTime == 1)
-            frameTime = 1000/capture.get(CV_CAP_PROP_FPS);
-        getFrame(capture, bgImage);
+            frameTime = 1000/bgCapture.get(CV_CAP_PROP_FPS);
+        getFrame(bgCapture, bgImage);
         bgIsMovie = true;
-        bgCapture = capture;
     }
     return opened;
 }
@@ -46,13 +42,9 @@ bool ImagesSupplier::openBackgroundMovie(const QString &file)
 bool ImagesSupplier::openForegroundImage(const QString &file)
 {
     QMutexLocker locker(&mutex);
-    bool opened = true;
-    Mat img = imread(file.toStdString());
-    if (img.data == NULL)
-        opened = false;
-    else
+    bool opened = openImage(file, fgImage);
+    if (opened)
     {
-        fgImage = img;
         fgIsMovie = false;
     }
     return opened;
@@ -61,16 +53,12 @@ bool ImagesSupplier::openForegroundImage(const QString &file)
 bool ImagesSupplier::openBackgroundImage(const QString &file)
 {
     QMutexLocker locker(&mutex);
-    bool opened = true;
-    Mat img = imread(file.toStdString());
-    if (img.data == NULL)
-        opened = false;
-    else
+    bool opened = openImage(file, bgImage);
+    if (opened)
     {
-        bgImage = img;
         bgIsMovie = false;
     }
-    return true;
+    return opened;
 }
 
 const Mat& ImagesSupplier::getForegroundImage(bool isPaused)
@@ -144,4 +132,30 @@ void ImagesSupplier::getFrame(VideoCapture &cap, Mat &mat)
     {
         qDebug() << e.what();
     }
+}
+
+bool ImagesSupplier::openImage(const QString file, Mat& image)
+{
+    bool opened = true;
+    Mat tmp = imread(file.toStdString());
+    if (tmp.data == NULL)
+    {
+        opened = false;
+    }
+    else
+    {
+        image = tmp;
+    }
+    return opened;
+}
+
+bool ImagesSupplier::openMovie(QString file, VideoCapture &capture)
+{
+    VideoCapture tmp;
+    bool opened = tmp.open(file.toStdString());
+    if (opened)
+    {
+        capture = tmp;
+    }
+    return opened;
 }
