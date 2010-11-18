@@ -143,18 +143,26 @@ void MainWidget::on_fgButton_clicked()
     QString file = QFileDialog::getOpenFileName(this, "Open foreground file", QDir::currentPath(), "Movies (*.avi);;Images (*.jpg)");
     if (file != QString())
     {
+        bool opened = false;
         if (file.contains(".avi"))
         {
-            if (! imagesSupplier->openForegroundMovie(file))
-                showOpenFailMessage(file);
+            if (imagesSupplier->openForegroundMovie(file))
+                opened = true;
         }
         else
         {
-            if (! imagesSupplier->openForegroundImage(file))
-                showOpenFailMessage(file);
+            if (imagesSupplier->openForegroundImage(file))
+                opened = true;
         }
-        setForegroundIcon(imagesSupplier->getForegroundIcon());
-        updateMovieLabel();
+        if (opened)
+        {
+            setForegroundIcon(imagesSupplier->getForegroundIcon());
+            updateMovieLabel();
+        }
+        else
+        {
+            showOpenFailMessage(file);
+        }
     }
 }
 
@@ -163,19 +171,26 @@ void MainWidget::on_bgButton_clicked()
     QString file = QFileDialog::getOpenFileName(this, "Open background file", QDir::currentPath(), "Movies (*.avi);;Images (*.jpg)");
     if (file != QString())
     {
+        bool opened = false;
         if (file.contains(".avi"))
         {
-            if (! imagesSupplier->openBackgroundMovie(file))
-                showOpenFailMessage(file);
+            if (imagesSupplier->openBackgroundMovie(file))
+                opened = true;
         }
         else
         {
-            if (! imagesSupplier->openBackgroundImage(file))
-                showOpenFailMessage(file);
+            if (imagesSupplier->openBackgroundImage(file))
+                opened = true;
         }
-        setBackgroundIcon(imagesSupplier->getBackgroundIcon());
-        updateMovieLabel();
-
+        if (opened)
+        {
+            setBackgroundIcon(imagesSupplier->getBackgroundIcon());
+            updateMovieLabel();
+        }
+        else
+        {
+            showOpenFailMessage(file);
+        }
     }
 }
 
