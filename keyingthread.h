@@ -40,6 +40,7 @@ public slots:
     void setSegmentaion(bool s);
 
 signals:
+    void progressChanged(int percent);
     void frameReady(const QImage&);
     void finished();
 

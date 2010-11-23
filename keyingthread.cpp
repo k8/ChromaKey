@@ -16,6 +16,7 @@ KeyingThread::~KeyingThread()
 {
     stop();
     wait();
+    qDebug() << "wtf";
 }
 
 void KeyingThread::init(KeyingThread *kt)
@@ -139,6 +140,7 @@ void KeyingThread::run()
         if (save)
         {
             imagesSupplier->saveFrame(outFrame);
+            emit progressChanged(imagesSupplier->getProgress());
             if (! imagesSupplier->hasMoreImages())
             {
                 qDebug() << "saving finised";

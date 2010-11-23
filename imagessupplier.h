@@ -27,6 +27,7 @@ public:
     bool isMovie();    
     bool hasMoreImages();
     void saveFrame(const Mat& img);
+    int getProgress();
 
 private:
     bool getFrame(VideoCapture& cap, Mat& mat);

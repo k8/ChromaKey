@@ -1,5 +1,6 @@
 #include "mainwidget.h"
 #include "ui_mainwidget.h"
+#include "filesavingdialog.h"
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QPixmap>
@@ -10,9 +11,7 @@
 
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MainWidget),
-    saveSupplier(0),
-    saveThread(0)
+    ui(new Ui::MainWidget)
 {
     ui->setupUi(this);    
     ui->playPauseButton->setDisabled(true);
@@ -77,14 +76,6 @@ void MainWidget::changeColor(QRgb color)
 void MainWidget::movieFinished()
 {
     qDebug() << time.elapsed();
-}
-
-void MainWidget::savingFinished()
-{
-    delete saveSupplier;
-    delete saveThread;
-    saveSupplier = 0;
-    saveThread = 0;
 }
 
 void MainWidget::changeEvent(QEvent *e)
@@ -210,11 +201,12 @@ void MainWidget::on_colorButton_clicked()
 
 void MainWidget::on_saveButton_clicked()
 {
-    saveSupplier = new ImagesSupplier();
-    saveSupplier->init(imagesSupplier);
-    saveSupplier->save("out.avi");
-    saveThread = new KeyingThread(saveSupplier, true);
-    saveThread->init(keyingThread);
-    connect(saveThread, SIGNAL(finished()), this, SLOT(savingFinished()));
-    saveThread->start();
+    QString filter = "Images (*.jpg)";
+    if (imagesSupplier->isMovie())
+        filter = "Movies (*.avi)";    QString file = QFileDialog::getSaveFileName(this, "Save file", QDir::currentPath(), filter);
+    if (file != QString())
+    {
+        FileSavingDialog* fs = new FileSavingDialog(imagesSupplier, keyingThread, file, this);
+        fs->show();
+    }
 }

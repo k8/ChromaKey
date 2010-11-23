@@ -178,6 +178,23 @@ void ImagesSupplier::saveFrame(const Mat &img)
     }
 }
 
+int ImagesSupplier::getProgress()
+{
+    int progress = 100;
+    if (fgIsMovie)
+    {
+        progress = fgCapture.get(CV_CAP_PROP_POS_AVI_RATIO)*100.0;
+    }
+    else if (bgIsMovie)
+    {
+        progress = bgCapture.get(CV_CAP_PROP_POS_AVI_RATIO)*100.0;
+    }
+    qDebug() << fgCapture.get(CV_CAP_PROP_POS_AVI_RATIO);
+    qDebug() << bgCapture.get(CV_CAP_PROP_POS_AVI_RATIO);
+    qDebug() << progress;
+    return progress;
+}
+
 bool ImagesSupplier::getFrame(VideoCapture &cap, Mat &mat)
 {
     Mat frame;
