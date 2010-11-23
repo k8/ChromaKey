@@ -4,12 +4,26 @@
 #include <QMutexLocker>
 
 ImagesSupplier::ImagesSupplier()
-    : fgIsMovie(false), bgIsMovie(false), frameTime(1)
+    : fgIsMovie(false), bgIsMovie(false),
+      fgFinished(false), bgFinished(false),
+      frameTime(1)
 {
     fgImage = Mat::ones(Size(640, 480), CV_8UC3);
     bgImage = Mat::ones(Size(640, 480), CV_8UC3);
     fill(fgImage, qRgb(255, 255, 255));
     fill(bgImage, qRgb(255, 255, 255));
+}
+
+void ImagesSupplier::init(ImagesSupplier *is)
+{
+    if (is->fgIsMovie)
+        openForegroundMovie(is->fgFile);
+    else
+        openForegroundImage(is->fgFile);
+    if (is->bgIsMovie)
+        openBackgroundMovie(is->bgFile);
+    else
+        openBackgroundImage(is->bgFile);
 }
 
 bool ImagesSupplier::openForegroundMovie(const QString &file)
@@ -21,7 +35,8 @@ bool ImagesSupplier::openForegroundMovie(const QString &file)
         frameTime = 1000/fgCapture.get(CV_CAP_PROP_FPS);
         getFrame(fgCapture, fgImage);
         fgIsMovie = true;
-    }
+        fgFile = file;
+    }    
     return opened;
 }
 
@@ -35,6 +50,7 @@ bool ImagesSupplier::openBackgroundMovie(const QString &file)
             frameTime = 1000/bgCapture.get(CV_CAP_PROP_FPS);
         getFrame(bgCapture, bgImage);
         bgIsMovie = true;
+        bgFile = file;
     }
     return opened;
 }
@@ -46,6 +62,7 @@ bool ImagesSupplier::openForegroundImage(const QString &file)
     if (opened)
     {
         fgIsMovie = false;
+        fgFile = file;
     }
     return opened;
 }
@@ -57,16 +74,23 @@ bool ImagesSupplier::openBackgroundImage(const QString &file)
     if (opened)
     {
         bgIsMovie = false;
+        bgFile = file;
     }
     return opened;
+}
+
+bool ImagesSupplier::save(const QString &file)
+{
+    outFile = file;
 }
 
 const Mat& ImagesSupplier::getForegroundImage(bool isPaused)
 {
     QMutexLocker locker(&mutex);
-    if (fgIsMovie && ! isPaused)
+    if (fgIsMovie && ! isPaused && ! fgFinished)
     {
-        getFrame(fgCapture, fgImage);
+        if (! getFrame(fgCapture, fgImage))
+            fgFinished = true;
     }
     return fgImage;
 }
@@ -74,9 +98,10 @@ const Mat& ImagesSupplier::getForegroundImage(bool isPaused)
 const Mat& ImagesSupplier::getBackgroundImage(bool isPaused)
 {
     QMutexLocker locker(&mutex);
-    if (bgIsMovie && ! isPaused)
+    if (bgIsMovie && ! isPaused && ! bgFinished)
     {
-        getFrame(bgCapture, bgImage);
+        if (getFrame(bgCapture, bgImage))
+            bgFinished = true;
     }
     return bgImage;
 }
@@ -120,21 +145,62 @@ bool ImagesSupplier::isMovie()
     return fgIsMovie || bgIsMovie;
 }
 
-void ImagesSupplier::getFrame(VideoCapture &cap, Mat &mat)
+bool ImagesSupplier::hasMoreImages()
+{
+  bool more = false;
+  if (fgIsMovie && ! fgFinished)
+      more = true;
+  if (bgIsMovie && ! bgFinished)
+      more = true;
+  return more;
+}
+
+void ImagesSupplier::saveFrame(const Mat &img)
+{
+    if (isMovie())
+    {
+        if (! videoWriter.isOpened())
+        {
+            if (openVideoWriter(outFile, img))
+                qDebug() << outFile << "opened";
+            else
+                qDebug() << outFile << "not opened";
+        }
+        videoWriter << img;
+        imwrite("frame.jpg", img);
+    }
+    else
+    {
+        if (imwrite(outFile.toStdString(), img))
+            qDebug() << outFile << "saved";
+        else
+            qDebug() << outFile << "not saved";
+    }
+}
+
+bool ImagesSupplier::getFrame(VideoCapture &cap, Mat &mat)
 {
     Mat frame;
     try
     {
         if (cap.grab() && cap.retrieve(frame))
+        {
             frame.copyTo(mat);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     catch (cv::Exception& e )
     {
         qDebug() << e.what();
     }
+    return false;
 }
 
-bool ImagesSupplier::openImage(const QString file, Mat& image)
+bool ImagesSupplier::openImage(const QString& file, Mat& image)
 {
     bool opened = true;
     Mat tmp = imread(file.toStdString());
@@ -149,7 +215,7 @@ bool ImagesSupplier::openImage(const QString file, Mat& image)
     return opened;
 }
 
-bool ImagesSupplier::openMovie(QString file, VideoCapture &capture)
+bool ImagesSupplier::openMovie(const QString& file, VideoCapture &capture)
 {
     VideoCapture tmp;
     bool opened = tmp.open(file.toStdString());
@@ -158,4 +224,17 @@ bool ImagesSupplier::openMovie(QString file, VideoCapture &capture)
         capture = tmp;
     }
     return opened;
+}
+
+bool ImagesSupplier::openVideoWriter(const QString &file, const Mat &img)
+{
+   int fourcc = bgCapture.get(CV_CAP_PROP_FOURCC);
+   int fps = bgCapture.get(CV_CAP_PROP_FPS);
+   if (fgIsMovie)
+   {
+       if (! bgIsMovie)
+        fourcc = fgCapture.get(CV_CAP_PROP_FOURCC);
+       fps = fgCapture.get(CV_CAP_PROP_FPS);
+   }
+   return videoWriter.open(file.toStdString(), fourcc, fps, Size(img.cols, img.rows));
 }

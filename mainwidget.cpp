@@ -10,7 +10,9 @@
 
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MainWidget)
+    ui(new Ui::MainWidget),
+    saveSupplier(0),
+    saveThread(0)
 {
     ui->setupUi(this);    
     ui->playPauseButton->setDisabled(true);
@@ -36,8 +38,6 @@ MainWidget::MainWidget(QWidget *parent) :
 
 MainWidget::~MainWidget()
 {
-    keyingThread->stop();
-    keyingThread->wait();
     delete imagesSupplier;
     delete keyingThread;
     delete ui;
@@ -77,6 +77,14 @@ void MainWidget::changeColor(QRgb color)
 void MainWidget::movieFinished()
 {
     qDebug() << time.elapsed();
+}
+
+void MainWidget::savingFinished()
+{
+    delete saveSupplier;
+    delete saveThread;
+    saveSupplier = 0;
+    saveThread = 0;
 }
 
 void MainWidget::changeEvent(QEvent *e)
@@ -198,4 +206,15 @@ void MainWidget::on_colorButton_clicked()
 {
     QColor color = QColorDialog::getColor(keyingThread->getColor());
     changeColor(color.rgb());
+}
+
+void MainWidget::on_saveButton_clicked()
+{
+    saveSupplier = new ImagesSupplier();
+    saveSupplier->init(imagesSupplier);
+    saveSupplier->save("out.avi");
+    saveThread = new KeyingThread(saveSupplier, true);
+    saveThread->init(keyingThread);
+    connect(saveThread, SIGNAL(finished()), this, SLOT(savingFinished()));
+    saveThread->start();
 }

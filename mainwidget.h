@@ -30,14 +30,18 @@ protected slots:
     void prepareFrame(const QImage& frame);
     void changeColor(QRgb color);
     void movieFinished();
+    void savingFinished();
 
 private:
     Ui::MainWidget *ui;
     ImagesSupplier* imagesSupplier;
     KeyingThread* keyingThread;
+    ImagesSupplier* saveSupplier;
+    KeyingThread* saveThread;
     QTime time;
 
 private slots:
+    void on_saveButton_clicked();
     void on_colorButton_clicked();
     void on_bgButton_clicked();
     void on_fgButton_clicked();

@@ -2,13 +2,29 @@
 #include <QMutexLocker>
 #include <QDebug>
 
-KeyingThread::KeyingThread(ImagesSupplier *is)
+KeyingThread::KeyingThread(ImagesSupplier *is, bool save)
     :
     imagesSupplier(is),
+    save(save),
     stopped(true), played(true),
     hue(0), saturation(0), value(0),  segmentation(false)
 {
     color = qRgb(0, 0, 0);
+}
+
+KeyingThread::~KeyingThread()
+{
+    stop();
+    wait();
+}
+
+void KeyingThread::init(KeyingThread *kt)
+{
+    color = kt->getColor().rgb();
+    hue = kt->getHue();
+    saturation = kt->getSaturation();
+    value = kt->getValue();
+    segmentation = kt->getSegmentation();
 }
 
 void KeyingThread::stop()
@@ -88,6 +104,7 @@ bool KeyingThread::isPaused()
 
 void KeyingThread::run()
 {
+    qDebug() << "keying thread started";
     using namespace cv;
     {
         QMutexLocker locker(&mutex);
@@ -96,13 +113,19 @@ void KeyingThread::run()
     }
     while (! isStopped())
     {
-        if (isPaused())
+        bool paused = isPaused();
+        if (! save)
         {
-            QMutexLocker locker(&mutex);
-            playContition.wait(&mutex);
+            if (isPaused())
+            {
+                QMutexLocker locker(&mutex);
+                playContition.wait(&mutex);
+            }
         }
-        Mat fgFrame = imagesSupplier->getForegroundImage(isPaused());
-        Mat bgFrame = imagesSupplier->getBackgroundImage(isPaused());
+        else
+            paused = false;
+        Mat fgFrame = imagesSupplier->getForegroundImage(paused);
+        Mat bgFrame = imagesSupplier->getBackgroundImage(paused);
         time.restart();
         mutex.lock();
         int c = color;
@@ -113,8 +136,20 @@ void KeyingThread::run()
         mutex.unlock();
         Mat outFrame;
         keying(fgFrame, bgFrame, outFrame, c, h, s, v, segm);
-        emit frameReady(fromCvMat(outFrame));
-        waitForFrame();
+        if (save)
+        {
+            imagesSupplier->saveFrame(outFrame);
+            if (! imagesSupplier->hasMoreImages())
+            {
+                qDebug() << "saving finised";
+                break;
+            }
+        }
+        else
+        {
+            emit frameReady(fromCvMat(outFrame));
+            waitForFrame();
+        }
     }
     emit finished();
 }

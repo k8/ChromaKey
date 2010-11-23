@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>546</width>
-    <height>271</height>
+    <width>894</width>
+    <height>557</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -369,6 +369,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="saveButton">
+           <property name="text">
+            <string>Save</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -382,9 +389,6 @@
           </spacer>
          </item>
         </layout>
-        <zorder></zorder>
-        <zorder>playPauseButton</zorder>
-        <zorder>horizontalSpacer</zorder>
        </widget>
       </item>
      </layout>
