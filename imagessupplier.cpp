@@ -189,9 +189,9 @@ int ImagesSupplier::getProgress()
     {
         progress = bgCapture.get(CV_CAP_PROP_POS_AVI_RATIO)*100.0;
     }
-    qDebug() << fgCapture.get(CV_CAP_PROP_POS_AVI_RATIO);
-    qDebug() << bgCapture.get(CV_CAP_PROP_POS_AVI_RATIO);
-    qDebug() << progress;
+//    qDebug() << fgCapture.get(CV_CAP_PROP_POS_AVI_RATIO);
+//    qDebug() << bgCapture.get(CV_CAP_PROP_POS_AVI_RATIO);
+//    qDebug() << progress;
     return progress;
 }
 
