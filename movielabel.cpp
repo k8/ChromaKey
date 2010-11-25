@@ -10,6 +10,7 @@ MovieLabel::MovieLabel(QWidget* parent)
 
 void MovieLabel::setPixmap(const QPixmap & pix)
 {    
+//    qDebug() << "pixmap size: " << pix.size();
     QLabel::setPixmap(scaledPixmap(pix));
 }
 
@@ -56,5 +57,8 @@ void MovieLabel::resizeEvent(QResizeEvent *)
     if (pix && !pix->isNull())
     {
         setPixmap(*pix);
+//        qDebug() << "size before: " << size();
+        QLabel::resize(pixmap()->size());
+//        qDebug() << "size after: " << size();
     }
 }

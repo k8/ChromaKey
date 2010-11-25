@@ -9,13 +9,15 @@ SOURCES += main.cpp \
     image.cpp \
     movielabel.cpp \
     imagessupplier.cpp \
-    filesavingdialog.cpp
+    filesavingdialog.cpp \
+    moviecontainer.cpp
 HEADERS += mainwidget.h \
     keyingthread.h \
     image.h \
     movielabel.h \
     imagessupplier.h \
-    filesavingdialog.h
+    filesavingdialog.h \
+    moviecontainer.h
 FORMS += mainwidget.ui \
     filesavingdialog.ui
 CONFIG += link_pkgconfig

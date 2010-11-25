@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTime>
+#include "filesavingdialog.h"
 #include "keyingthread.h"
 #include "imagessupplier.h"
 
@@ -30,9 +31,11 @@ protected slots:
     void prepareFrame(const QImage& frame);
     void changeColor(QRgb color);
     void movieFinished();
+    void savingFinished();
 
 private:
     Ui::MainWidget *ui;
+    FileSavingDialog* savingDialog;
     ImagesSupplier* imagesSupplier;
     KeyingThread* keyingThread;
     QTime time;

@@ -3,15 +3,17 @@
 
 #include <QObject>
 #include <QImage>
+#include <QRgb>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <QMutex>
+#include <QSize>
 using namespace cv;
 
 class ImagesSupplier : public QObject
 {
 public:
-    ImagesSupplier();
+    ImagesSupplier(QRgb color = 0, QSize size = QSize(0, 0));
     void init(ImagesSupplier* is);
     bool openForegroundMovie(const QString& file);
     bool openBackgroundMovie(const QString& file);
@@ -30,10 +32,11 @@ public:
     int getProgress();
 
 private:
+    void init(QRgb color, QSize size);
     bool getFrame(VideoCapture& cap, Mat& mat);
     bool openImage(const QString& file, Mat& image);
     bool openMovie(const QString& file, VideoCapture& capture);
-    bool openVideoWriter(const QString& file, const Mat& img);
+    bool openVideoWriter(const QString& file, const Mat& img);    
 
     QMutex mutex;
     double frameTime;

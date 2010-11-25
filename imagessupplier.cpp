@@ -3,15 +3,16 @@
 #include <QDebug>
 #include <QMutexLocker>
 
-ImagesSupplier::ImagesSupplier()
+ImagesSupplier::ImagesSupplier(QRgb color, QSize size)
     : fgIsMovie(false), bgIsMovie(false),
       fgFinished(false), bgFinished(false),
       frameTime(1)
 {
-    fgImage = Mat::ones(Size(640, 480), CV_8UC3);
-    bgImage = Mat::ones(Size(640, 480), CV_8UC3);
-    fill(fgImage, qRgb(255, 255, 255));
-    fill(bgImage, qRgb(255, 255, 255));
+    Size imSize(size.width()*2, size.height()*2);
+    fgImage = Mat::ones(imSize, CV_8UC3);
+    bgImage = Mat::ones(imSize, CV_8UC3);
+    fill(fgImage, color);
+    fill(bgImage, color);
 }
 
 void ImagesSupplier::init(ImagesSupplier *is)
@@ -35,6 +36,7 @@ bool ImagesSupplier::openForegroundMovie(const QString &file)
         frameTime = 1000/fgCapture.get(CV_CAP_PROP_FPS);
         getFrame(fgCapture, fgImage);
         fgIsMovie = true;
+        fgFinished = false;
         fgFile = file;
     }    
     return opened;
@@ -50,6 +52,7 @@ bool ImagesSupplier::openBackgroundMovie(const QString &file)
             frameTime = 1000/bgCapture.get(CV_CAP_PROP_FPS);
         getFrame(bgCapture, bgImage);
         bgIsMovie = true;
+        bgFinished = false;
         bgFile = file;
     }
     return opened;

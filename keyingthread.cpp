@@ -14,9 +14,6 @@ KeyingThread::KeyingThread(ImagesSupplier *is, bool save)
 
 KeyingThread::~KeyingThread()
 {
-    stop();
-    wait();
-    qDebug() << "wtf";
 }
 
 void KeyingThread::init(KeyingThread *kt)
@@ -120,6 +117,7 @@ void KeyingThread::run()
             if (isPaused())
             {
                 QMutexLocker locker(&mutex);
+                qDebug() << "pause";
                 playContition.wait(&mutex);
             }
         }
@@ -153,6 +151,7 @@ void KeyingThread::run()
             waitForFrame();
         }
     }
+    qDebug() << "finished";
     emit finished();
 }
 

@@ -1,6 +1,5 @@
 #include "mainwidget.h"
 #include "ui_mainwidget.h"
-#include "filesavingdialog.h"
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QPixmap>
@@ -11,19 +10,23 @@
 
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MainWidget)
+    ui(new Ui::MainWidget),
+    savingDialog(0)
 {
     ui->setupUi(this);    
+    QRgb color = qRgb(0, 0, 0);
+    QSize movieSize(300, 200);
     ui->playPauseButton->setDisabled(true);
-    imagesSupplier = new ImagesSupplier();
+    imagesSupplier = new ImagesSupplier(color, movieSize);
     keyingThread = new KeyingThread(imagesSupplier);
     ui->colorButton->setPalette(QPalette(Qt::white));
     setForegroundIcon(imagesSupplier->getForegroundIcon());
     setBackgroundIcon(imagesSupplier->getBackgroundIcon());
-    QPixmap pix(ui->movieLabel->width(), ui->movieLabel->height());
-    pix.fill();
+    QPixmap pix(movieSize);
+    pix.fill(color);
+    ui->movieLabel->setMinimumSize(movieSize);
     ui->movieLabel->setPixmap(pix);
-    changeColor(qRgb(255, 255, 255));
+    changeColor(color);
     connect(keyingThread, SIGNAL(frameReady(const QImage&)), this, SLOT(prepareFrame(const QImage&)));
     connect(ui->movieLabel, SIGNAL(colorChanged(QRgb)), this, SLOT(changeColor(QRgb)));
     connect(ui->segmentationCheck, SIGNAL(toggled(bool)), keyingThread, SLOT(setSegmentaion(bool)));
@@ -37,8 +40,10 @@ MainWidget::MainWidget(QWidget *parent) :
 
 MainWidget::~MainWidget()
 {
-    delete imagesSupplier;
+    keyingThread->stop();
+    keyingThread->wait();
     delete keyingThread;
+    delete imagesSupplier;
     delete ui;
 }
 
@@ -76,6 +81,12 @@ void MainWidget::changeColor(QRgb color)
 void MainWidget::movieFinished()
 {
     qDebug() << time.elapsed();
+}
+
+void MainWidget::savingFinished()
+{
+    delete savingDialog;
+    savingDialog = 0;
 }
 
 void MainWidget::changeEvent(QEvent *e)
@@ -206,7 +217,8 @@ void MainWidget::on_saveButton_clicked()
         filter = "Movies (*.avi)";    QString file = QFileDialog::getSaveFileName(this, "Save file", QDir::currentPath(), filter);
     if (file != QString())
     {
-        FileSavingDialog* fs = new FileSavingDialog(imagesSupplier, keyingThread, file, this);
-        fs->show();
+        savingDialog = new FileSavingDialog(imagesSupplier, keyingThread, file, this);
+        savingDialog->show();
+        connect(savingDialog, SIGNAL(finished()), this, SLOT(savingFinished()));
     }
 }

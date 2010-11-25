@@ -1,6 +1,9 @@
 #include "filesavingdialog.h"
 #include "ui_filesavingdialog.h"
 #include <QFileDialog>
+#include <QMessageBox>
+#include <QDebug>
+#include <QCloseEvent>
 
 FileSavingDialog::FileSavingDialog(ImagesSupplier *is, KeyingThread *kt, const QString& file, QWidget *parent)
     :
@@ -22,9 +25,11 @@ FileSavingDialog::FileSavingDialog(ImagesSupplier *is, KeyingThread *kt, const Q
 
 FileSavingDialog::~FileSavingDialog()
 {
-    delete ui;
-    delete saveSupplier;
+    saveThread->stop();
+    saveThread->wait();
     delete saveThread;
+    delete saveSupplier;
+    delete ui;
 }
 
 void FileSavingDialog::changeEvent(QEvent *e)
@@ -36,6 +41,24 @@ void FileSavingDialog::changeEvent(QEvent *e)
         break;
     default:
         break;
+    }
+}
+
+void FileSavingDialog::closeEvent(QCloseEvent *event)
+{
+    QMessageBox msgBox;
+    msgBox.setText("Do you want to stop saving?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    int ret = msgBox.exec();
+    if (ret == QMessageBox::Yes)
+    {
+         event->accept();
+         emit finished();
+    }
+    else
+    {
+        event->ignore();
     }
 }
 
