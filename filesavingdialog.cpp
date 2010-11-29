@@ -14,7 +14,7 @@ FileSavingDialog::FileSavingDialog(ImagesSupplier *is, KeyingThread *kt, const Q
     ui->setupUi(this);
     saveSupplier = new ImagesSupplier();
     saveSupplier->init(is);
-    saveThread = new KeyingThread(saveSupplier, true);
+    saveThread = new KeyingThread(saveSupplier, 0, true);
     saveThread->init(kt);
     connect(saveThread, SIGNAL(finished()), this, SLOT(savingFinished()));
     ui->label->setText("Saving "+file);

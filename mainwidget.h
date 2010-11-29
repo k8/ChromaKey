@@ -6,6 +6,7 @@
 #include "filesavingdialog.h"
 #include "keyingthread.h"
 #include "imagessupplier.h"
+#include "image.h"
 
 namespace Ui {
     class MainWidget;
@@ -28,7 +29,7 @@ protected:
     void showOpenFailMessage(const QString& file);
 
 protected slots:
-    void prepareFrame(const QImage& frame);
+    void prepareFrame(const QImage& big, const QImage& small);
     void changeColor(QRgb color);
     void movieFinished();
     void savingFinished();
@@ -37,6 +38,7 @@ private:
     Ui::MainWidget *ui;
     FileSavingDialog* savingDialog;
     ImagesSupplier* imagesSupplier;
+    ImagesProcessor* imagesProcessor;
     KeyingThread* keyingThread;
     QTime time;
 

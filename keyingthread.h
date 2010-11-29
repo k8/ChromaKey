@@ -16,7 +16,7 @@ class KeyingThread : public QThread
 {
     Q_OBJECT
 public:
-    KeyingThread(ImagesSupplier* is, bool save = false);
+    KeyingThread(ImagesSupplier* is, ImagesProcessor* ip = 0, bool save = false);
     ~KeyingThread();
     void init(KeyingThread* kt);
     void stop();    
@@ -30,8 +30,7 @@ public:
     int getSaturation() {QMutexLocker locker(&mutex); return saturation; }
     int getValue() {QMutexLocker locker(&mutex); return value; }
     bool getSegmentation() {QMutexLocker locker(&mutex); return segmentation; }
-
-
+        
 public slots:
     void setColor(QRgb c);
     void setHue(int h);
@@ -41,7 +40,7 @@ public slots:
 
 signals:
     void progressChanged(int percent);
-    void frameReady(const QImage&);
+    void frameReady(const QImage&, const QImage&);
     void finished();
 
 protected:
@@ -50,6 +49,7 @@ protected:
 
 private:
     ImagesSupplier* imagesSupplier;
+    ImagesProcessor* imagesProcessor;
     QMutex mutex;
     QWaitCondition playContition;
     bool stopped;

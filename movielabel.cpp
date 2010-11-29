@@ -8,34 +8,37 @@ MovieLabel::MovieLabel(QWidget* parent)
     setCursor(Qt::CrossCursor);    
 }
 
+void MovieLabel::setImagesProcessor(ImagesProcessor *ip)
+{
+    imagesProcessor = ip;
+}
+
 void MovieLabel::setPixmap(const QPixmap & pix)
-{    
-//    qDebug() << "pixmap size: " << pix.size();
-    QLabel::setPixmap(scaledPixmap(pix));
+{
+    orgPixmap = pix;
+    QLabel::setPixmap(pix);
+//    scalePixmap();
+}
+
+void MovieLabel::setPixmaps(const QPixmap &big, const QPixmap &small)
+{
+    orgPixmap = big;
+    QLabel::setPixmap(small);
 }
 
 QPixmap MovieLabel::scaledPixmap(const QPixmap& pix)
 {
     if (pix.isNull())
         return pix;
-    if (pix.width()/width() < pix.height()/height())
+    if (pix.width()/(double)width() < pix.height()/(double)height())
         return pix.scaledToHeight(height());
     else
         return pix.scaledToWidth(width());
 }
 
-void MovieLabel::paintEvent(QPaintEvent * event)
+void MovieLabel::scalePixmap()
 {
-    const QPixmap* pix = pixmap();
-    if (pix && !pix->isNull())
-    {
-        if (minimumWidth() < pix->width() && maximumHeight() < pix->height())
-        {
-            setMinimumSize(pix->size());
-            setMaximumSize(pix->size());
-        }
-    }    
-    QLabel::paintEvent(event);
+    QLabel::setPixmap(scaledPixmap(orgPixmap));
 }
 
 void MovieLabel::mousePressEvent(QMouseEvent *ev)
@@ -51,14 +54,8 @@ void MovieLabel::mousePressEvent(QMouseEvent *ev)
     }
 }
 
-void MovieLabel::resizeEvent(QResizeEvent *)
+void MovieLabel::resizeEvent(QResizeEvent * event)
 {
-    const QPixmap* pix = pixmap();
-    if (pix && !pix->isNull())
-    {
-        setPixmap(*pix);
-//        qDebug() << "size before: " << size();
-        QLabel::resize(pixmap()->size());
-//        qDebug() << "size after: " << size();
-    }
+    imagesProcessor->setSize(event->size());
+    scalePixmap();
 }

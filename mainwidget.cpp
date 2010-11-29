@@ -18,7 +18,9 @@ MainWidget::MainWidget(QWidget *parent) :
     QSize movieSize(300, 200);
     ui->playPauseButton->setDisabled(true);
     imagesSupplier = new ImagesSupplier(color, movieSize);
-    keyingThread = new KeyingThread(imagesSupplier);
+    imagesProcessor = new ImagesProcessor(ui->movieLabel->size());
+    keyingThread = new KeyingThread(imagesSupplier, imagesProcessor);
+    ui->movieLabel->setImagesProcessor(imagesProcessor);
     ui->colorButton->setPalette(QPalette(Qt::white));
     setForegroundIcon(imagesSupplier->getForegroundIcon());
     setBackgroundIcon(imagesSupplier->getBackgroundIcon());
@@ -27,7 +29,7 @@ MainWidget::MainWidget(QWidget *parent) :
     ui->movieLabel->setMinimumSize(movieSize);
     ui->movieLabel->setPixmap(pix);
     changeColor(color);
-    connect(keyingThread, SIGNAL(frameReady(const QImage&)), this, SLOT(prepareFrame(const QImage&)));
+    connect(keyingThread, SIGNAL(frameReady(const QImage&, const QImage&)), this, SLOT(prepareFrame(const QImage&, const QImage&)));
     connect(ui->movieLabel, SIGNAL(colorChanged(QRgb)), this, SLOT(changeColor(QRgb)));
     connect(ui->segmentationCheck, SIGNAL(toggled(bool)), keyingThread, SLOT(setSegmentaion(bool)));
     connect(ui->hueSlider, SIGNAL(valueChanged(int)), keyingThread, SLOT(setHue(int)));
@@ -126,9 +128,9 @@ void MainWidget::showOpenFailMessage(const QString &file)
     showFailMessage("Failed to open file "+file+".");
 }
 
-void MainWidget::prepareFrame(const QImage &frame)
+void MainWidget::prepareFrame(const QImage &big, const QImage &small)
 {
-    ui->movieLabel->setPixmap(QPixmap::fromImage(frame));
+    ui->movieLabel->setPixmaps(QPixmap::fromImage(big), QPixmap::fromImage(small));
 }
 
 void MainWidget::on_playPauseButton_clicked()

@@ -11,8 +11,8 @@ ImagesSupplier::ImagesSupplier(QRgb color, QSize size)
     Size imSize(size.width()*2, size.height()*2);
     fgImage = Mat::ones(imSize, CV_8UC3);
     bgImage = Mat::ones(imSize, CV_8UC3);
-    fill(fgImage, color);
-    fill(bgImage, color);
+    ImagesProcessor::fill(fgImage, color);
+    ImagesProcessor::fill(bgImage, color);
 }
 
 void ImagesSupplier::init(ImagesSupplier *is)
@@ -131,7 +131,7 @@ QImage ImagesSupplier::getForegroundIcon()
     QMutexLocker locker(&mutex);
     Mat icon;
     resize(fgImage, icon, Size(50, 50));
-    return fromCvMat(icon);
+    return ImagesProcessor::fromCvMat(icon);
 }
 
 QImage ImagesSupplier::getBackgroundIcon()
@@ -139,7 +139,7 @@ QImage ImagesSupplier::getBackgroundIcon()
     QMutexLocker locker(&mutex);
     Mat icon;
     resize(bgImage, icon, Size(50, 50));
-    return fromCvMat(icon);
+    return ImagesProcessor::fromCvMat(icon);
 }
 
 bool ImagesSupplier::isMovie()

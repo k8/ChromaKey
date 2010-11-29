@@ -1,8 +1,24 @@
 #include "image.h"
 #include <QDebug>
 #include <QColor>
+#include <QMutexLocker>
 
-QImage fromCvMat(const Mat& mat)
+ImagesProcessor::ImagesProcessor(QSize size)
+    : imageSize(size)
+{
+}
+
+QImage ImagesProcessor::scaledFromCvMat(const Mat& inMat)
+{
+    Mat mat;
+    QSize size = getSize();
+//    qDebug() << size;
+//    qDebug() << inMat.size().width << inMat.size().height;
+    resize(inMat, mat, min(size.width()/(double)inMat.size().width, size.height()/(double)inMat.size().height));
+    return fromCvMat(mat);
+}
+
+QImage ImagesProcessor::fromCvMat(const Mat& mat)
 {
     if(mat.channels()==1)
     {
@@ -18,7 +34,7 @@ QImage fromCvMat(const Mat& mat)
     }
 }
 
-void fill(Mat &image, QRgb color)
+void ImagesProcessor::fill(Mat &image, QRgb color)
 {
     for (int i=0; i<image.rows; i++)
     {
@@ -32,16 +48,16 @@ void fill(Mat &image, QRgb color)
   }
 }
 
-void resize(const Mat &mat, Mat &out, double fact)
+void ImagesProcessor::resize(const Mat &mat, Mat &out, double fact)
 {
     if (fact == 1)
         return;
     int width = mat.cols*fact;
     int height = mat.rows*fact;
-    resize(mat, out, Size(width, height));
+    cv::resize(mat, out, Size(width, height));
 }
 
-void prepareSize(const Mat &a, const Mat &b, Mat &aout, Mat &bout)
+void ImagesProcessor::prepareSize(const Mat &a, const Mat &b, Mat &aout, Mat &bout)
 {
     b.copyTo(bout);
     if (a.cols <= b.cols && a.rows <= b.rows)
@@ -63,7 +79,7 @@ void prepareSize(const Mat &a, const Mat &b, Mat &aout, Mat &bout)
     }
 }
 
-void segmentation(Mat &in)
+void ImagesProcessor::segmentation(Mat &in)
 {
     Mat image;
     cvtColor(in, image, CV_BGR2HSV);
@@ -80,7 +96,7 @@ void segmentation(Mat &in)
     cvtColor(image, in, CV_HSV2BGR);
 }
 
-void keying(const Mat &fg, const Mat &bg, Mat& out, QRgb color, int hue, int saturation, int value, bool segm)
+void ImagesProcessor::keying(const Mat &fg, const Mat &bg, Mat& out, QRgb color, int hue, int saturation, int value, bool segm)
 {    
     Mat a;
     Mat b;
@@ -119,4 +135,16 @@ void keying(const Mat &fg, const Mat &bg, Mat& out, QRgb color, int hue, int sat
     Rect r(out.cols-image.cols, out.rows-image.rows, image.cols, image.rows);
     Mat roi(out, r);
     image.copyTo(roi, mask);
+}
+
+void ImagesProcessor::setSize(QSize size)
+{
+    QMutexLocker locker(&mutex);
+    imageSize = size;
+}
+
+QSize ImagesProcessor::getSize()
+{
+    QMutexLocker locker(&mutex);
+    return imageSize;
 }

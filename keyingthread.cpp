@@ -2,13 +2,16 @@
 #include <QMutexLocker>
 #include <QDebug>
 
-KeyingThread::KeyingThread(ImagesSupplier *is, bool save)
+KeyingThread::KeyingThread(ImagesSupplier *is, ImagesProcessor *ip, bool save)
     :
     imagesSupplier(is),
+    imagesProcessor(ip),
     save(save),
     stopped(true), played(true),
     hue(0), saturation(0), value(0),  segmentation(false)
 {
+    if (! imagesProcessor)
+        imagesProcessor = new ImagesProcessor();
     color = qRgb(0, 0, 0);
 }
 
@@ -134,7 +137,7 @@ void KeyingThread::run()
         bool segm = segmentation;
         mutex.unlock();
         Mat outFrame;
-        keying(fgFrame, bgFrame, outFrame, c, h, s, v, segm);
+        imagesProcessor->keying(fgFrame, bgFrame, outFrame, c, h, s, v, segm);
         if (save)
         {
             imagesSupplier->saveFrame(outFrame);
@@ -147,7 +150,7 @@ void KeyingThread::run()
         }
         else
         {
-            emit frameReady(fromCvMat(outFrame));
+            emit frameReady(imagesProcessor->fromCvMat(outFrame), imagesProcessor->scaledFromCvMat(outFrame));
             waitForFrame();
         }
     }
