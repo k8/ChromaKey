@@ -27,7 +27,7 @@ MainWidget::MainWidget(QWidget *parent) :
     QPixmap pix(movieSize);
     pix.fill(color);
     ui->movieLabel->setMinimumSize(movieSize);
-    ui->movieLabel->setPixmap(pix);
+    ui->movieLabel->setPixmap(pix);    
     changeColor(color);
     connect(keyingThread, SIGNAL(frameReady(const QImage&, const QImage&)), this, SLOT(prepareFrame(const QImage&, const QImage&)));
     connect(ui->movieLabel, SIGNAL(colorChanged(QRgb)), this, SLOT(changeColor(QRgb)));

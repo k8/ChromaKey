@@ -46,19 +46,22 @@ void FileSavingDialog::changeEvent(QEvent *e)
 
 void FileSavingDialog::closeEvent(QCloseEvent *event)
 {
-    QMessageBox msgBox;
-    msgBox.setText("Do you want to stop saving?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    int ret = msgBox.exec();
-    if (ret == QMessageBox::Yes)
+    if (saveThread->isRunning())
     {
-         event->accept();
-         emit finished();
-    }
-    else
-    {
-        event->ignore();
+        QMessageBox msgBox;
+        msgBox.setText("Do you want to stop saving?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        int ret = msgBox.exec();
+        if (ret == QMessageBox::Yes)
+        {
+             event->accept();
+             emit finished();
+        }
+        else
+        {
+            event->ignore();
+        }
     }
 }
 

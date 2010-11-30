@@ -32,7 +32,8 @@ public:
     int getProgress();
 
 private:
-    void init(QRgb color, QSize size);
+    void createImage(Mat& img, Size size);
+    void init(QRgb c, QSize size);
     bool getFrame(VideoCapture& cap, Mat& mat);
     bool openImage(const QString& file, Mat& image);
     bool openMovie(const QString& file, VideoCapture& capture);
@@ -45,6 +46,8 @@ private:
     VideoWriter videoWriter;
     Mat fgImage;
     Mat bgImage;
+    bool fgOpened;
+    bool bgOpened;
     bool fgIsMovie;
     bool bgIsMovie;
     bool fgFinished;
@@ -52,6 +55,7 @@ private:
     QString fgFile;
     QString bgFile;
     QString outFile;
+    QRgb color;
 };
 
 #endif // IMAGESSUPPLIER_H

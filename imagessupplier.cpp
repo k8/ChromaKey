@@ -3,16 +3,22 @@
 #include <QDebug>
 #include <QMutexLocker>
 
-ImagesSupplier::ImagesSupplier(QRgb color, QSize size)
+ImagesSupplier::ImagesSupplier(QRgb c, QSize size)
     : fgIsMovie(false), bgIsMovie(false),
       fgFinished(false), bgFinished(false),
-      frameTime(1)
+      fgOpened(false), bgOpened(false),
+      frameTime(1), color(c)
 {
-    Size imSize(size.width()*2, size.height()*2);
-    fgImage = Mat::ones(imSize, CV_8UC3);
-    bgImage = Mat::ones(imSize, CV_8UC3);
-    ImagesProcessor::fill(fgImage, color);
-    ImagesProcessor::fill(bgImage, color);
+    Size imSize(size.width(), size.height());
+    createImage(fgImage, imSize);
+    createImage(bgImage, imSize);
+}
+
+void ImagesSupplier::createImage(Mat &img, Size size)
+{
+    qDebug() << "createImage";
+    img = Mat::ones(size, CV_8UC3);
+    ImagesProcessor::fill(img, color);
 }
 
 void ImagesSupplier::init(ImagesSupplier *is)
@@ -38,7 +44,12 @@ bool ImagesSupplier::openForegroundMovie(const QString &file)
         fgIsMovie = true;
         fgFinished = false;
         fgFile = file;
-    }    
+        fgOpened = true;
+        if (! bgOpened)
+        {
+            createImage(bgImage, fgImage.size());
+        }
+    }
     return opened;
 }
 
@@ -54,6 +65,11 @@ bool ImagesSupplier::openBackgroundMovie(const QString &file)
         bgIsMovie = true;
         bgFinished = false;
         bgFile = file;
+        bgOpened = true;
+        if (! fgOpened)
+        {
+            createImage(fgImage, bgImage.size());
+        }
     }
     return opened;
 }
@@ -66,6 +82,11 @@ bool ImagesSupplier::openForegroundImage(const QString &file)
     {
         fgIsMovie = false;
         fgFile = file;
+        fgOpened = true;
+        if (! bgOpened)
+        {
+            createImage(bgImage, fgImage.size());
+        }
     }
     return opened;
 }
@@ -78,6 +99,11 @@ bool ImagesSupplier::openBackgroundImage(const QString &file)
     {
         bgIsMovie = false;
         bgFile = file;
+        bgOpened = true;
+        if (! fgOpened)
+        {
+            createImage(fgImage, bgImage.size());
+        }
     }
     return opened;
 }
@@ -103,7 +129,7 @@ const Mat& ImagesSupplier::getBackgroundImage(bool isPaused)
     QMutexLocker locker(&mutex);
     if (bgIsMovie && ! isPaused && ! bgFinished)
     {
-        if (getFrame(bgCapture, bgImage))
+        if (! getFrame(bgCapture, bgImage))
             bgFinished = true;
     }
     return bgImage;
@@ -248,12 +274,21 @@ bool ImagesSupplier::openMovie(const QString& file, VideoCapture &capture)
 
 bool ImagesSupplier::openVideoWriter(const QString &file, const Mat &img)
 {
+    qDebug() << "CV_FOURCC('P','I','M','1')    " << CV_FOURCC('P','I','M','1')    ;
+    qDebug() << "CV_FOURCC('M','J','P','G')    " << CV_FOURCC('M','J','P','G')    ;
+    qDebug() << "CV_FOURCC('M', 'P', '4', '2') " << CV_FOURCC('M', 'P', '4', '2') ;
+    qDebug() << "CV_FOURCC('D', 'I', 'V', '3') " << CV_FOURCC('D', 'I', 'V', '3') ;
+    qDebug() << "CV_FOURCC('D', 'I', 'V', 'X') " << CV_FOURCC('D', 'I', 'V', 'X') ;
+    qDebug() << "CV_FOURCC('U', '2', '6', '3') " << CV_FOURCC('U', '2', '6', '3') ;
+    qDebug() << "CV_FOURCC('I', '2', '6', '3') " << CV_FOURCC('I', '2', '6', '3') ;
+    qDebug() << "CV_FOURCC('F', 'L', 'V', '1') " << CV_FOURCC('F', 'L', 'V', '1') ;
    int fourcc = bgCapture.get(CV_CAP_PROP_FOURCC);
-   int fps = bgCapture.get(CV_CAP_PROP_FPS);
-   if (fgIsMovie)
+   int fps = bgCapture.get(CV_CAP_PROP_FPS);    
+   if (fgIsMovie && ! bgIsMovie)
    {
-       if (! bgIsMovie)
-        fourcc = fgCapture.get(CV_CAP_PROP_FOURCC);
+       fourcc = fgCapture.get(CV_CAP_PROP_FOURCC);
+       if (fourcc ==  CV_FOURCC('M','J','P','G'))
+           fourcc = CV_FOURCC('F', 'L', 'V', '1');
        fps = fgCapture.get(CV_CAP_PROP_FPS);
    }
    return videoWriter.open(file.toStdString(), fourcc, fps, Size(img.cols, img.rows));
