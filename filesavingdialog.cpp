@@ -63,6 +63,10 @@ void FileSavingDialog::closeEvent(QCloseEvent *event)
             event->ignore();
         }
     }
+    else
+    {
+        event->accept();
+    }
 }
 
 void FileSavingDialog::savingFinished()
