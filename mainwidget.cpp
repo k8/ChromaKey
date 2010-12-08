@@ -20,6 +20,7 @@ MainWidget::MainWidget(QWidget *parent) :
     imagesSupplier = new ImagesSupplier(color, movieSize);
     imagesProcessor = new ImagesProcessor(ui->movieLabel->size());
     keyingThread = new KeyingThread(imagesSupplier, imagesProcessor);
+    ui->hsvButton->toggle();
     ui->movieLabel->setImagesProcessor(imagesProcessor);
     ui->colorButton->setPalette(QPalette(Qt::white));
     setForegroundIcon(imagesSupplier->getForegroundIcon());
@@ -38,6 +39,12 @@ MainWidget::MainWidget(QWidget *parent) :
     connect(keyingThread, SIGNAL(finished()), this, SLOT(movieFinished()));
     keyingThread->start();
     time.start();
+
+    connect(ui->ySpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));
+    connect(ui->cRSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));
+    connect(ui->cBSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));
+//    updateColor(0);
+    ui->groupBox_2->setVisible(false);
 }
 
 MainWidget::~MainWidget()
@@ -223,4 +230,44 @@ void MainWidget::on_saveButton_clicked()
         savingDialog->show();
         connect(savingDialog, SIGNAL(finished()), this, SLOT(savingFinished()));
     }
+}
+
+void MainWidget::on_hsvButton_clicked()
+{
+    keyingThread->setKeyingAlgorithm(KeyingThread::KA_HSV);
+}
+
+void MainWidget::on_ycbcrButton_clicked()
+{
+    keyingThread->setKeyingAlgorithm(KeyingThread::KA_YCbCr);
+}
+
+void MainWidget::on_luminanceSlider_valueChanged(int value)
+{
+    keyingThread->setLuminance(value);
+}
+
+void MainWidget::on_blueSlider_valueChanged(int value)
+{
+    keyingThread->setBlue(value);
+}
+
+void MainWidget::on_redSlider_valueChanged(int value)
+{
+    keyingThread->setRed(value);
+}
+
+void MainWidget::updateColor(int)
+{
+    int y = ui->ySpinBox->value();
+    int cr = ui->cRSpinBox->value();
+    int cb = ui->cBSpinBox->value();
+
+    Color color(y, cr, cb);
+    changeColor(color.toRgb().rgb());
+}
+
+void MainWidget::on_alphaSpinBox_valueChanged(int value)
+{
+    keyingThread->setAlpha(value);
 }

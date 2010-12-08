@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QColor>
 #include <QMutexLocker>
+#include <cmath>
 
 ImagesProcessor::ImagesProcessor(QSize size)
     : imageSize(size)
@@ -14,7 +15,8 @@ QImage ImagesProcessor::scaledFromCvMat(const Mat& inMat)
     QSize size = getSize();
 //    qDebug() << size;
 //    qDebug() << inMat.size().width << inMat.size().height;
-    resize(inMat, mat, min(size.width()/(double)inMat.size().width, size.height()/(double)inMat.size().height));
+    double scaleFactor = min(size.width()/(double)inMat.size().width, size.height()/(double)inMat.size().height);
+    resize(inMat, mat, scaleFactor);
     return fromCvMat(mat);
 }
 
@@ -51,7 +53,10 @@ void ImagesProcessor::fill(Mat &image, QRgb color)
 void ImagesProcessor::resize(const Mat &mat, Mat &out, double fact)
 {
     if (fact == 1)
-        return;
+    {
+        out = mat;
+        return ;
+    }
     int width = mat.cols*fact;
     int height = mat.rows*fact;
     cv::resize(mat, out, Size(width, height));
@@ -96,7 +101,7 @@ void ImagesProcessor::segmentation(Mat &in)
     cvtColor(image, in, CV_HSV2BGR);
 }
 
-void ImagesProcessor::keying(const Mat &fg, const Mat &bg, Mat& out, QRgb color, int hue, int saturation, int value, bool segm)
+void ImagesProcessor::keyingHSV(const Mat &fg, const Mat &bg, Mat &out, QRgb color, int hue, int saturation, int value, bool segm)
 {    
     Mat a;
     Mat b;
@@ -135,6 +140,108 @@ void ImagesProcessor::keying(const Mat &fg, const Mat &bg, Mat& out, QRgb color,
     Rect r(out.cols-image.cols, out.rows-image.rows, image.cols, image.rows);
     Mat roi(out, r);
     image.copyTo(roi, mask);
+}
+
+double keyValue(int in, int fix, int tol)
+{
+    double k = 0;
+    int H = fix+tol;
+    int L = fix-tol;
+    if (in > H)
+        k = 1;
+    else if (in < L)
+        k = 0;
+    else
+        k = (in-L)/(double)(H-L);
+    return k;
+}
+
+double abs(double x)
+{
+    if (x < 0)
+        x = -x;
+    return x;
+}
+
+void ImagesProcessor::keyingYCbCr(const Mat &fg, const Mat &bg, Mat &out, QRgb color, int luminance, int blue, int red, double alpha, bool segm)
+{
+    alpha = (alpha/180.0)*M_PI;
+    Mat a;
+    Mat b;
+    prepareSize(fg, bg, a, b);
+    Mat image;
+    a.copyTo(image);
+    if (segm)
+        segmentation(image);
+    Color col(color);
+    Mat fgYCrCb;
+    cvtColor(image, fgYCrCb, CV_BGR2YCrCb);
+    b.copyTo(out);
+    Rect r(out.cols-image.cols, out.rows-image.rows, image.cols, image.rows);
+    Mat roi(out, r);
+    Mat bgYCrCb;
+    cvtColor(roi, bgYCrCb, CV_BGR2YCrCb);
+
+    int y = col.Y();
+    int cr = col.Cr();
+    int cb = col.Cb();
+
+    YCbCrCordinate key_cord(cb, cr);
+    double sin_tau = key_cord.sin();
+    double cos_tau = key_cord.cos();
+
+    double tan_alpha = tan(alpha/2.0);
+    if (tan_alpha == 0)
+        tan_alpha = 0.000001;
+
+    double min =  0;
+
+    int count = 0;
+    for (int i=0; i<image.rows; i++)
+    {
+        for (int j=0; j<image.cols; j++)
+        {
+            Vec3b& elem = fgYCrCb.at<Vec3b>(i,j);
+            Vec3b& bgElem = bgYCrCb.at<Vec3b>(i,j);
+            int ey = elem[0];
+            int ecr = elem[1];
+            int ecb = elem[2];
+
+            double ecb_norm = YCbCrCordinate::normalized(ecb);
+            double ecr_norm = YCbCrCordinate::normalized(ecr);
+
+            double X = ecb_norm*cos_tau+ecr_norm*sin_tau;
+            double Z = ecr_norm*cos_tau-ecb_norm*sin_tau;
+
+            double K_FG = 0;
+            min =  abs(Z)/tan_alpha;
+            if (X > min)
+            {
+                K_FG = X-min;
+            }
+            double CB_FG = ecb-K_FG*cos_tau;
+            double CR_FG = ecr-K_FG*sin_tau;
+
+
+//            qDebug() << X << Z << abs(Z);
+//            qDebug() << min;
+//            qDebug() << K_FG;
+
+            if (K_FG > 0)
+            {                
+                bgElem = elem;
+                count++;
+            }
+//            if (!((//abs(ey-y) < luminance &&
+//                abs(ecr-cr) < red &&
+//                abs(ecb-cb) < blue)))
+//            {
+//                    bgElem = elem;
+//            }
+        }
+    }   
+//    qDebug() << "COUNT: " << count;
+    cvtColor(bgYCrCb, roi, CV_YCrCb2BGR);
 }
 
 void ImagesProcessor::setSize(QSize size)

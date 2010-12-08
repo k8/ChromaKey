@@ -11,6 +11,7 @@ MovieLabel::MovieLabel(QWidget* parent)
 void MovieLabel::setImagesProcessor(ImagesProcessor *ip)
 {
     imagesProcessor = ip;
+    imagesProcessor->setSize(size());
 }
 
 void MovieLabel::setPixmap(const QPixmap & pix)

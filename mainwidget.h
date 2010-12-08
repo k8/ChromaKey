@@ -43,6 +43,14 @@ private:
     QTime time;
 
 private slots:
+    void on_alphaSpinBox_valueChanged(int );
+    void updateColor(int);
+
+    void on_redSlider_valueChanged(int value);
+    void on_blueSlider_valueChanged(int value);
+    void on_luminanceSlider_valueChanged(int value);
+    void on_ycbcrButton_clicked();
+    void on_hsvButton_clicked();
     void on_saveButton_clicked();
     void on_colorButton_clicked();
     void on_bgButton_clicked();

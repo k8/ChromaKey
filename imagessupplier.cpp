@@ -176,12 +176,13 @@ bool ImagesSupplier::isMovie()
 
 bool ImagesSupplier::hasMoreImages()
 {
-  bool more = false;
-  if (fgIsMovie && ! fgFinished)
-      more = true;
-  if (bgIsMovie && ! bgFinished)
-      more = true;
-  return more;
+  if (! isMovie())
+      return false;
+  if (fgIsMovie && fgFinished)
+      return false;
+  if (bgIsMovie && bgFinished)
+      return false;
+  return true;
 }
 
 void ImagesSupplier::saveFrame(const Mat &img)
@@ -196,7 +197,6 @@ void ImagesSupplier::saveFrame(const Mat &img)
                 qDebug() << outFile << "not opened";
         }
         videoWriter << img;
-        imwrite("frame.jpg", img);
     }
     else
     {
@@ -274,22 +274,22 @@ bool ImagesSupplier::openMovie(const QString& file, VideoCapture &capture)
 
 bool ImagesSupplier::openVideoWriter(const QString &file, const Mat &img)
 {
-    qDebug() << "CV_FOURCC('P','I','M','1')    " << CV_FOURCC('P','I','M','1')    ;
-    qDebug() << "CV_FOURCC('M','J','P','G')    " << CV_FOURCC('M','J','P','G')    ;
-    qDebug() << "CV_FOURCC('M', 'P', '4', '2') " << CV_FOURCC('M', 'P', '4', '2') ;
-    qDebug() << "CV_FOURCC('D', 'I', 'V', '3') " << CV_FOURCC('D', 'I', 'V', '3') ;
-    qDebug() << "CV_FOURCC('D', 'I', 'V', 'X') " << CV_FOURCC('D', 'I', 'V', 'X') ;
-    qDebug() << "CV_FOURCC('U', '2', '6', '3') " << CV_FOURCC('U', '2', '6', '3') ;
-    qDebug() << "CV_FOURCC('I', '2', '6', '3') " << CV_FOURCC('I', '2', '6', '3') ;
-    qDebug() << "CV_FOURCC('F', 'L', 'V', '1') " << CV_FOURCC('F', 'L', 'V', '1') ;
+//    qDebug() << "CV_FOURCC('P','I','M','1')    " << CV_FOURCC('P','I','M','1')    ;
+//    qDebug() << "CV_FOURCC('M','J','P','G')    " << CV_FOURCC('M','J','P','G')    ;
+//    qDebug() << "CV_FOURCC('M', 'P', '4', '2') " << CV_FOURCC('M', 'P', '4', '2') ;
+//    qDebug() << "CV_FOURCC('D', 'I', 'V', '3') " << CV_FOURCC('D', 'I', 'V', '3') ;
+//    qDebug() << "CV_FOURCC('D', 'I', 'V', 'X') " << CV_FOURCC('D', 'I', 'V', 'X') ;
+//    qDebug() << "CV_FOURCC('U', '2', '6', '3') " << CV_FOURCC('U', '2', '6', '3') ;
+//    qDebug() << "CV_FOURCC('I', '2', '6', '3') " << CV_FOURCC('I', '2', '6', '3') ;
+//    qDebug() << "CV_FOURCC('F', 'L', 'V', '1') " << CV_FOURCC('F', 'L', 'V', '1') ;
    int fourcc = bgCapture.get(CV_CAP_PROP_FOURCC);
    int fps = bgCapture.get(CV_CAP_PROP_FPS);    
-   if (fgIsMovie && ! bgIsMovie)
+   if (fgIsMovie)
    {
        fourcc = fgCapture.get(CV_CAP_PROP_FOURCC);
-       if (fourcc ==  CV_FOURCC('M','J','P','G'))
-           fourcc = CV_FOURCC('F', 'L', 'V', '1');
        fps = fgCapture.get(CV_CAP_PROP_FPS);
    }
+   if (fourcc ==  CV_FOURCC('M','J','P','G'))
+       fourcc = CV_FOURCC('F', 'L', 'V', '1');
    return videoWriter.open(file.toStdString(), fourcc, fps, Size(img.cols, img.rows));
 }
