@@ -4,8 +4,8 @@
 #include <QMutexLocker>
 #include <cmath>
 
-ImagesProcessor::ImagesProcessor(QSize size)
-    : imageSize(size)
+ImagesProcessor::ImagesProcessor(KeyingParameters *keyingParams, QSize size)
+    : kp(keyingParams), imageSize(size)
 {
 }
 
@@ -13,8 +13,6 @@ QImage ImagesProcessor::scaledFromCvMat(const Mat& inMat)
 {
     Mat mat;
     QSize size = getSize();
-//    qDebug() << size;
-//    qDebug() << inMat.size().width << inMat.size().height;
     double scaleFactor = min(size.width()/(double)inMat.size().width, size.height()/(double)inMat.size().height);
     resize(inMat, mat, scaleFactor);
     return fromCvMat(mat);
@@ -101,26 +99,39 @@ void ImagesProcessor::segmentation(Mat &in)
     cvtColor(image, in, CV_HSV2BGR);
 }
 
-void ImagesProcessor::keyingHSV(const Mat &fg, const Mat &bg, Mat &out, QRgb color, int hue, int saturation, int value, bool segm)
+void ImagesProcessor::keying(const Mat &fg, const Mat &bg, Mat &out)
+{
+    switch (kp->getKeyingAlgorithm())
+    {
+    case KeyingParameters::KA_HSV:
+        keyingHSV(fg, bg, out);
+        break;
+    case KeyingParameters::KA_YCbCr:
+        keyingYCbCr(fg, bg, out);
+        break;
+    }
+}
+
+void ImagesProcessor::keyingHSV(const Mat &fg, const Mat &bg, Mat &out)
 {    
     Mat a;
     Mat b;
     prepareSize(fg, bg, a, b);
     Mat image;
     a.copyTo(image);
-    if (segm)
+    if (kp->getSegmentation())
         segmentation(image);
-    Mat blur;
-    GaussianBlur(image, blur, Size(13, 13), 1.5, 1.5);
     Mat mask = Mat::ones(image.rows, image.cols, CV_8UC1);
-    blur = image-blur;
-    QColor col(color);
+    QColor col = kp->getColor();
     col.toHsv();
     int h = col.hue();
     int s = col.saturation();
     int v = col.value();
     Mat imgHSV;
     cvtColor(image, imgHSV, CV_BGR2HSV);
+    int hue = kp->getHue();
+    int saturation = kp->getSaturation();
+    int value = kp->getValue();
     for (int i=0; i<image.rows; i++)
     {
         for (int j=0; j<image.cols; j++)
@@ -163,17 +174,17 @@ double abs(double x)
     return x;
 }
 
-void ImagesProcessor::keyingYCbCr(const Mat &fg, const Mat &bg, Mat &out, QRgb color, int luminance, int blue, int red, double alpha, bool segm)
+void ImagesProcessor::keyingYCbCr(const Mat &fg, const Mat &bg, Mat &out)
 {
-    alpha = (alpha/180.0)*M_PI;
+    int alpha = (kp->getAlpha()/180.0)*M_PI;
     Mat a;
     Mat b;
     prepareSize(fg, bg, a, b);
     Mat image;
     a.copyTo(image);
-    if (segm)
+    if (kp->getSegmentation())
         segmentation(image);
-    Color col(color);
+    Color col(kp->getColor().rgb());
     Mat fgYCrCb;
     cvtColor(image, fgYCrCb, CV_BGR2YCrCb);
     b.copyTo(out);

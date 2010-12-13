@@ -14,37 +14,35 @@ MainWidget::MainWidget(QWidget *parent) :
     savingDialog(0)
 {
     ui->setupUi(this);    
+
     QRgb color = qRgb(0, 0, 0);
-    QSize movieSize(300, 200);
-    ui->playPauseButton->setDisabled(true);
-    imagesSupplier = new ImagesSupplier(color, movieSize);
-    imagesProcessor = new ImagesProcessor(ui->movieLabel->size());
-    keyingThread = new KeyingThread(imagesSupplier, imagesProcessor);
+    QSize movieSize(300, 200);    
+
     ui->hsvButton->toggle();
-    ui->movieLabel->setImagesProcessor(imagesProcessor);
-    ui->colorButton->setPalette(QPalette(Qt::white));
+    imagesSupplier = new ImagesSupplier(color, movieSize);
+    keyingParameters = new KeyingParameters(ui->hsvButton->isChecked() ? KeyingParameters::KA_HSV : KeyingParameters::KA_YCbCr,
+                                            color,
+                                            ui->hueSlider->value(),
+                                            ui->saturationSlider->value(),
+                                            ui->valueSlider->value(),
+                                            ui->luminanceSlider->value(),
+                                            ui->blueSlider->value(),
+                                            ui->redSlider->value(),
+                                            ui->alphaSpinBox->value(),
+                                            ui->segmentationCheck->isChecked());
+    imagesProcessor = new ImagesProcessor(keyingParameters, movieSize);
+    keyingThread = new KeyingThread(imagesSupplier, imagesProcessor);
+    ui->movieLabel->init(color, movieSize, imagesProcessor);
+
+    connectObjects();
+
+    keyingThread->start();
+
     setForegroundIcon(imagesSupplier->getForegroundIcon());
     setBackgroundIcon(imagesSupplier->getBackgroundIcon());
-    QPixmap pix(movieSize);
-    pix.fill(color);
-    ui->movieLabel->setMinimumSize(movieSize);
-    ui->movieLabel->setPixmap(pix);    
     changeColor(color);
-    connect(keyingThread, SIGNAL(frameReady(const QImage&, const QImage&)), this, SLOT(prepareFrame(const QImage&, const QImage&)));
-    connect(ui->movieLabel, SIGNAL(colorChanged(QRgb)), this, SLOT(changeColor(QRgb)));
-    connect(ui->segmentationCheck, SIGNAL(toggled(bool)), keyingThread, SLOT(setSegmentaion(bool)));
-    connect(ui->hueSlider, SIGNAL(valueChanged(int)), keyingThread, SLOT(setHue(int)));
-    connect(ui->saturationSlider, SIGNAL(valueChanged(int)), keyingThread, SLOT(setSaturation(int)));
-    connect(ui->valueSlider, SIGNAL(valueChanged(int)), keyingThread, SLOT(setValue(int)));
-    connect(keyingThread, SIGNAL(finished()), this, SLOT(movieFinished()));
-    keyingThread->start();
-    time.start();
-
-    connect(ui->ySpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));
-    connect(ui->cRSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));
-    connect(ui->cBSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));
-//    updateColor(0);
     ui->groupBox_2->setVisible(false);
+    showPlayPauseButton(false);
 }
 
 MainWidget::~MainWidget()
@@ -54,6 +52,31 @@ MainWidget::~MainWidget()
     delete keyingThread;
     delete imagesSupplier;
     delete ui;
+}
+
+void MainWidget::connectObjects()
+{
+    connect(keyingThread, SIGNAL(frameReady(const QImage&, const QImage&)), this, SLOT(prepareFrame(const QImage&, const QImage&)));
+    connect(keyingThread, SIGNAL(noMoreFrames()), this, SLOT(movieFinished()));
+    connect(keyingParameters, SIGNAL(parameterChanged()), keyingThread, SLOT(wake()));
+
+    connect(ui->movieLabel, SIGNAL(colorChanged(QRgb)), this, SLOT(changeColor(QRgb)));
+
+    connect(ui->hueSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setHue(int)));
+    connect(ui->saturationSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setSaturation(int)));
+    connect(ui->valueSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setValue(int)));
+
+    connect(ui->segmentationCheck, SIGNAL(toggled(bool)), keyingParameters, SLOT(setSegmentaion(bool)));
+
+    connect(ui->ySpinBox, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setLuminance(int)));
+    connect(ui->blueSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setBlue(int)));
+    connect(ui->redSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setRed(int)));
+
+    connect(ui->alphaSpinBox, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setAlpha(int)));
+
+    connect(ui->ySpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));
+    connect(ui->cRSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));
+    connect(ui->cBSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));     
 }
 
 void MainWidget::setForegroundIcon(const QImage& img)
@@ -69,14 +92,7 @@ void MainWidget::setBackgroundIcon(const QImage& img)
 void MainWidget::updateMovieLabel()
 {
     keyingThread->update();
-    if (imagesSupplier->isMovie())
-    {
-        ui->playPauseButton->setDisabled(false);
-    }
-    else
-    {
-        ui->playPauseButton->setDisabled(true);
-    }
+    showPlayPauseButton(imagesSupplier->isMovie());
 }
 
 void MainWidget::changeColor(QRgb color)
@@ -84,12 +100,7 @@ void MainWidget::changeColor(QRgb color)
     QPixmap pix(ui->colorButton->width(), ui->colorButton->height());
     pix.fill(QColor(color));
     ui->colorButton->setIcon(pix);;
-    keyingThread->setColor(color);
-}
-
-void MainWidget::movieFinished()
-{
-    qDebug() << time.elapsed();
+    keyingParameters->setColor(color);
 }
 
 void MainWidget::savingFinished()
@@ -113,7 +124,7 @@ void MainWidget::changeEvent(QEvent *e)
 void MainWidget::pause()
 {
     keyingThread->pause();
-    ui->playPauseButton->setText("Play");
+    ui->playPauseButton->setText("Play ");
 }
 
 void MainWidget::play()
@@ -135,18 +146,24 @@ void MainWidget::showOpenFailMessage(const QString &file)
     showFailMessage("Failed to open file "+file+".");
 }
 
+void MainWidget::showPlayPauseButton(bool show)
+{
+    ui->playPauseButton->setVisible(show);
+}
+
 void MainWidget::prepareFrame(const QImage &big, const QImage &small)
 {
     ui->movieLabel->setPixmaps(QPixmap::fromImage(big), QPixmap::fromImage(small));
 }
 
+void MainWidget::movieFinished()
+{
+    showPlayPauseButton(false);
+    pause();
+}
+
 void MainWidget::on_playPauseButton_clicked()
 {
-//    if (!keyingThread->isRunning())
-//    {
-//        keyingThread->start();
-//        time.start();
-//    }
     if (keyingThread->isPaused())
     {
         play();
@@ -215,7 +232,7 @@ void MainWidget::on_bgButton_clicked()
 
 void MainWidget::on_colorButton_clicked()
 {
-    QColor color = QColorDialog::getColor(keyingThread->getColor());
+    QColor color = QColorDialog::getColor(keyingParameters->getColor());
     changeColor(color.rgb());
 }
 
@@ -226,35 +243,10 @@ void MainWidget::on_saveButton_clicked()
         filter = "Movies (*.avi)";    QString file = QFileDialog::getSaveFileName(this, "Save file", QDir::currentPath(), filter);
     if (file != QString())
     {
-        savingDialog = new FileSavingDialog(imagesSupplier, keyingThread, file, this);
+        savingDialog = new FileSavingDialog(imagesSupplier, keyingParameters, file, this);
         savingDialog->show();
         connect(savingDialog, SIGNAL(finished()), this, SLOT(savingFinished()));
     }
-}
-
-void MainWidget::on_hsvButton_clicked()
-{
-    keyingThread->setKeyingAlgorithm(KeyingThread::KA_HSV);
-}
-
-void MainWidget::on_ycbcrButton_clicked()
-{
-    keyingThread->setKeyingAlgorithm(KeyingThread::KA_YCbCr);
-}
-
-void MainWidget::on_luminanceSlider_valueChanged(int value)
-{
-    keyingThread->setLuminance(value);
-}
-
-void MainWidget::on_blueSlider_valueChanged(int value)
-{
-    keyingThread->setBlue(value);
-}
-
-void MainWidget::on_redSlider_valueChanged(int value)
-{
-    keyingThread->setRed(value);
 }
 
 void MainWidget::updateColor(int)
@@ -267,7 +259,12 @@ void MainWidget::updateColor(int)
     changeColor(color.toRgb().rgb());
 }
 
-void MainWidget::on_alphaSpinBox_valueChanged(int value)
+void MainWidget::on_hsvButton_clicked()
 {
-    keyingThread->setAlpha(value);
+    keyingParameters->setKeyingAlgorithm(KeyingParameters::KA_HSV);
+}
+
+void MainWidget::on_ycbcrButton_clicked()
+{
+    keyingParameters->setKeyingAlgorithm(KeyingParameters::KA_YCbCr);
 }

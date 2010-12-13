@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "imagessupplier.h"
+#include "keyingparameters.h"
 #include "keyingthread.h"
 
 namespace Ui {
@@ -12,7 +13,7 @@ namespace Ui {
 class FileSavingDialog : public QDialog {
     Q_OBJECT
 public:
-    FileSavingDialog(ImagesSupplier* is, KeyingThread* kt, const QString& file, QWidget *parent = 0);
+    FileSavingDialog(ImagesSupplier* is, KeyingParameters* kp, const QString& file, QWidget *parent = 0);
     ~FileSavingDialog();
 
 protected:

@@ -1,21 +1,21 @@
 #include "filesavingdialog.h"
 #include "ui_filesavingdialog.h"
+#include "image.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDebug>
 #include <QCloseEvent>
 
-FileSavingDialog::FileSavingDialog(ImagesSupplier *is, KeyingThread *kt, const QString& file, QWidget *parent)
+
+FileSavingDialog::FileSavingDialog(ImagesSupplier *is, KeyingParameters* kp, const QString& file, QWidget *parent)
     :
     QDialog(parent),
     ui(new Ui::FileSavingDialog)
 {
-//    setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(this);
     saveSupplier = new ImagesSupplier();
     saveSupplier->init(is);
-    saveThread = new KeyingThread(saveSupplier, 0, true);
-    saveThread->init(kt);
+    saveThread = new KeyingThread(saveSupplier, new ImagesProcessor(kp), true);
     connect(saveThread, SIGNAL(finished()), this, SLOT(savingFinished()));
     ui->label->setText("Saving "+file);
     connect(saveThread, SIGNAL(progressChanged(int)), ui->progressBar, SLOT(setValue(int)));

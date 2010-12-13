@@ -1,6 +1,7 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#include "keyingparameters.h"
 #include <QDebug>
 #include <QImage>
 #include <QMutex>
@@ -14,12 +15,13 @@ class ImagesProcessor
 {
 public:
 
-    ImagesProcessor(QSize size = QSize(100, 100));
+    ImagesProcessor(KeyingParameters* keyingParams = 0, QSize size = QSize(100, 100));
     static QImage fromCvMat(const Mat& mat);
     QImage scaledFromCvMat(const Mat& mat);
     static void fill(Mat& mat, QRgb color);
-    void keyingHSV(const Mat& fg, const Mat& bg, Mat& out, QRgb color, int hue, int saturation, int value, bool segm);
-    void keyingYCbCr(const Mat& fg, const Mat& bg, Mat& out, QRgb color, int luminance, int blue, int red, double alpha, bool segm);
+    void keying(const Mat& fg, const Mat& bg, Mat& out);
+    void keyingHSV(const Mat& fg, const Mat& bg, Mat& out);
+    void keyingYCbCr(const Mat& fg, const Mat& bg, Mat& out);
     void setSize(QSize size);
     QSize getSize();
 
@@ -28,8 +30,9 @@ private:
     void prepareSize(const Mat& a, const Mat& b, Mat& c, Mat& d);
     void segmentation(Mat& in);
 
-    QSize imageSize;
     QMutex mutex;
+    KeyingParameters* kp;
+    QSize imageSize;
 };
 
 class Color : public QColor
@@ -39,7 +42,7 @@ public:
     {
     }
     Color(int Y, int Cr, int Cb) : y(Y), cr(Cr), cb(Cb), ycrcb(true), RGB(false) {}
-    Color(QRgb& c) : QColor(c), y(0), cr(0), cb(0), ycrcb(false), RGB(true) {}
+    Color(const QRgb& c) : QColor(c), y(0), cr(0), cb(0), ycrcb(false), RGB(true) {}
     Color toRgb() {prepareRGB(); return *this;}
     int Y() {prepareYCrCb(); return y;}
     int Cr() {prepareYCrCb(); return cr;}

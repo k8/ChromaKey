@@ -10,6 +10,7 @@ class MovieLabel : public QLabel
     Q_OBJECT
 public:
     MovieLabel(QWidget* parent);   
+    void init(QRgb color, QSize size, ImagesProcessor* ip);
     void setImagesProcessor(ImagesProcessor* ip);
     void setPixmap(const QPixmap &);
     void setPixmaps(const QPixmap& big, const QPixmap& small);

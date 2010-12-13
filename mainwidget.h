@@ -2,11 +2,11 @@
 #define MAINWIDGET_H
 
 #include <QWidget>
-#include <QTime>
 #include "filesavingdialog.h"
 #include "keyingthread.h"
 #include "imagessupplier.h"
 #include "image.h"
+#include "keyingparameters.h"
 
 namespace Ui {
     class MainWidget;
@@ -17,11 +17,12 @@ class MainWidget : public QWidget {
 public:
     MainWidget(QWidget *parent = 0);
     ~MainWidget();
+
+protected:
+    void connectObjects();
     void setForegroundIcon(const QImage& img);
     void setBackgroundIcon(const QImage& img);
     void updateMovieLabel();
-
-protected:
     void changeEvent(QEvent *e);
     void pause();
     void play();
@@ -31,7 +32,6 @@ protected:
 protected slots:
     void prepareFrame(const QImage& big, const QImage& small);
     void changeColor(QRgb color);
-    void movieFinished();
     void savingFinished();
 
 private:
@@ -40,22 +40,20 @@ private:
     ImagesSupplier* imagesSupplier;
     ImagesProcessor* imagesProcessor;
     KeyingThread* keyingThread;
-    QTime time;
+    KeyingParameters* keyingParameters;
 
 private slots:
-    void on_alphaSpinBox_valueChanged(int );
-    void updateColor(int);
-
-    void on_redSlider_valueChanged(int value);
-    void on_blueSlider_valueChanged(int value);
-    void on_luminanceSlider_valueChanged(int value);
     void on_ycbcrButton_clicked();
     void on_hsvButton_clicked();
-    void on_saveButton_clicked();
+    void updateColor(int);
+    void showPlayPauseButton(bool show);
+    void movieFinished();
+
     void on_colorButton_clicked();
     void on_bgButton_clicked();
     void on_fgButton_clicked();
     void on_playPauseButton_clicked();
+    void on_saveButton_clicked();
 };
 
 #endif // MAINWIDGET_H

@@ -8,6 +8,16 @@ MovieLabel::MovieLabel(QWidget* parent)
     setCursor(Qt::CrossCursor);    
 }
 
+void MovieLabel::init(QRgb color, QSize size, ImagesProcessor *ip)
+{
+    QPixmap pix(size);
+    pix.fill(color);
+    setMinimumSize(size);
+    setPixmap(pix);
+    imagesProcessor = ip;
+    imagesProcessor->setSize(size);
+}
+
 void MovieLabel::setImagesProcessor(ImagesProcessor *ip)
 {
     imagesProcessor = ip;

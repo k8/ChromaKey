@@ -4,10 +4,11 @@
 #include <QMutexLocker>
 
 ImagesSupplier::ImagesSupplier(QRgb c, QSize size)
-    : fgIsMovie(false), bgIsMovie(false),
-      fgFinished(false), bgFinished(false),
+    : frameTime(1),
+      fgIsMovie(false), bgIsMovie(false),
       fgOpened(false), bgOpened(false),
-      frameTime(1), color(c)
+      fgFinished(true), bgFinished(true),
+      color(c)
 {
     Size imSize(size.width(), size.height());
     createImage(fgImage, imSize);
@@ -16,7 +17,6 @@ ImagesSupplier::ImagesSupplier(QRgb c, QSize size)
 
 void ImagesSupplier::createImage(Mat &img, Size size)
 {
-    qDebug() << "createImage";
     img = Mat::ones(size, CV_8UC3);
     ImagesProcessor::fill(img, color);
 }
@@ -81,6 +81,7 @@ bool ImagesSupplier::openForegroundImage(const QString &file)
     if (opened)
     {
         fgIsMovie = false;
+        fgFinished = true;
         fgFile = file;
         fgOpened = true;
         if (! bgOpened)
@@ -98,6 +99,7 @@ bool ImagesSupplier::openBackgroundImage(const QString &file)
     if (opened)
     {
         bgIsMovie = false;
+        bgFinished = true;
         bgFile = file;
         bgOpened = true;
         if (! fgOpened)
@@ -111,6 +113,7 @@ bool ImagesSupplier::openBackgroundImage(const QString &file)
 bool ImagesSupplier::save(const QString &file)
 {
     outFile = file;
+    return true;
 }
 
 const Mat& ImagesSupplier::getForegroundImage(bool isPaused)
@@ -176,13 +179,7 @@ bool ImagesSupplier::isMovie()
 
 bool ImagesSupplier::hasMoreImages()
 {
-  if (! isMovie())
-      return false;
-  if (fgIsMovie && fgFinished)
-      return false;
-  if (bgIsMovie && bgFinished)
-      return false;
-  return true;
+  return ! (fgFinished || bgFinished);
 }
 
 void ImagesSupplier::saveFrame(const Mat &img)

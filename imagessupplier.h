@@ -46,10 +46,10 @@ private:
     VideoWriter videoWriter;
     Mat fgImage;
     Mat bgImage;
-    bool fgOpened;
-    bool bgOpened;
     bool fgIsMovie;
     bool bgIsMovie;
+    bool fgOpened;
+    bool bgOpened;
     bool fgFinished;
     bool bgFinished;
     QString fgFile;
