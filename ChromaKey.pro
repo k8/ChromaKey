@@ -10,14 +10,20 @@ SOURCES += main.cpp \
     movielabel.cpp \
     imagessupplier.cpp \
     filesavingdialog.cpp \
-    keyingparameters.cpp
+    keyingparameters.cpp \
+    pausablethread.cpp \
+    savingthread.cpp \
+    realtimethread.cpp
 HEADERS += mainwidget.h \
     keyingthread.h \
     image.h \
     movielabel.h \
     imagessupplier.h \
     filesavingdialog.h \
-    keyingparameters.h
+    keyingparameters.h \
+    pausablethread.h \
+    savingthread.h \
+    realtimethread.h
 FORMS += mainwidget.ui \
     filesavingdialog.ui
 CONFIG += link_pkgconfig

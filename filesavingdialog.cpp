@@ -15,7 +15,8 @@ FileSavingDialog::FileSavingDialog(ImagesSupplier *is, KeyingParameters* kp, con
     ui->setupUi(this);
     saveSupplier = new ImagesSupplier();
     saveSupplier->init(is);
-    saveThread = new KeyingThread(saveSupplier, new ImagesProcessor(kp), true);
+    saveThread = new SavingThread(saveSupplier, new ImagesProcessor(kp));
+    saveThread->play();
     connect(saveThread, SIGNAL(finished()), this, SLOT(savingFinished()));
     ui->label->setText("Saving "+file);
     connect(saveThread, SIGNAL(progressChanged(int)), ui->progressBar, SLOT(setValue(int)));

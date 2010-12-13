@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include "filesavingdialog.h"
-#include "keyingthread.h"
+#include "realtimethread.h"
 #include "imagessupplier.h"
 #include "image.h"
 #include "keyingparameters.h"
@@ -39,7 +39,7 @@ private:
     FileSavingDialog* savingDialog;
     ImagesSupplier* imagesSupplier;
     ImagesProcessor* imagesProcessor;
-    KeyingThread* keyingThread;
+    RealTimeThread* keyingThread;
     KeyingParameters* keyingParameters;
 
 private slots:

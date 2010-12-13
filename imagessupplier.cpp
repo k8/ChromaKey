@@ -116,7 +116,7 @@ bool ImagesSupplier::save(const QString &file)
     return true;
 }
 
-const Mat& ImagesSupplier::getForegroundImage(bool isPaused)
+const Mat& ImagesSupplier::getFgImage(bool isPaused)
 {
     QMutexLocker locker(&mutex);
     if (fgIsMovie && ! isPaused && ! fgFinished)
@@ -127,7 +127,7 @@ const Mat& ImagesSupplier::getForegroundImage(bool isPaused)
     return fgImage;
 }
 
-const Mat& ImagesSupplier::getBackgroundImage(bool isPaused)
+const Mat& ImagesSupplier::getBgImage(bool isPaused)
 {
     QMutexLocker locker(&mutex);
     if (bgIsMovie && ! isPaused && ! bgFinished)

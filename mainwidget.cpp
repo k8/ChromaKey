@@ -31,7 +31,7 @@ MainWidget::MainWidget(QWidget *parent) :
                                             ui->alphaSpinBox->value(),
                                             ui->segmentationCheck->isChecked());
     imagesProcessor = new ImagesProcessor(keyingParameters, movieSize);
-    keyingThread = new KeyingThread(imagesSupplier, imagesProcessor);
+    keyingThread = new RealTimeThread(imagesSupplier, imagesProcessor);
     ui->movieLabel->init(color, movieSize, imagesProcessor);
 
     connectObjects();

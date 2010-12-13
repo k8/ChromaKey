@@ -20,8 +20,8 @@ public:
     bool openForegroundImage(const QString& file);
     bool openBackgroundImage(const QString& file);
     bool save(const QString& file);
-    const Mat& getForegroundImage(bool isPaused);
-    const Mat& getBackgroundImage(bool isPaused);
+    const Mat& getFgImage(bool isPaused);
+    const Mat& getBgImage(bool isPaused);
     double getFrameTime();
     void cutFrames(int n);
     QImage getForegroundIcon();

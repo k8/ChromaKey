@@ -1,50 +1,25 @@
 #ifndef KEYINGTHREAD_H
 #define KEYINGTHREAD_H
 
-#include <QThread>
-#include <QMutex>
-#include <QTime>
-#include <QColor>
-#include <QRgb>
-#include <QWaitCondition>
+#include "pausablethread.h"
 #include "image.h"
 #include "imagessupplier.h"
+#include "opencv/cv.h"
 
-class KeyingThread : public QThread
+class KeyingThread : public PausableThread
 {
     Q_OBJECT
 public:
-    KeyingThread(ImagesSupplier* is, ImagesProcessor* ip = 0, bool save = false);
+    KeyingThread(ImagesSupplier* is, ImagesProcessor* ip);
     ~KeyingThread();
-    void stop();    
-    void pause();
-    void play();
-    void update();
-    bool isStopped();
-    bool isPaused();
-
-public slots:
-    void wake();
-
-signals:
-    void progressChanged(int percent);
-    void frameReady(const QImage&, const QImage&);
-    void finished();
-    void noMoreFrames();
+    void keying(cv::Mat& out);
 
 protected:
-    void run();
-    void waitForFrame();
+    virtual bool nextIteration() = 0;
 
-private:
+protected:
     ImagesSupplier* imagesSupplier;
     ImagesProcessor* imagesProcessor;
-    QMutex mutex;
-    QWaitCondition playContition;
-    bool stopped;
-    bool played;
-    QTime time;
-    bool save;
 };
 
 #endif // KEYINGTHREAD_H

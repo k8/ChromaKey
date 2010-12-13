@@ -4,7 +4,7 @@
 #include <QDialog>
 #include "imagessupplier.h"
 #include "keyingparameters.h"
-#include "keyingthread.h"
+#include "savingthread.h"
 
 namespace Ui {
     class FileSavingDialog;
@@ -29,7 +29,7 @@ protected slots:
 private:
     Ui::FileSavingDialog *ui;
     ImagesSupplier* saveSupplier;
-    KeyingThread* saveThread;
+    SavingThread* saveThread;
 };
 
 #endif // FILESAVINGDIALOG_H
