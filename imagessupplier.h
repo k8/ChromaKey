@@ -24,8 +24,8 @@ public:
     const Mat& getBgImage(bool isPaused);
     double getFrameTime();
     void cutFrames(int n);
-    QImage getForegroundIcon();
-    QImage getBackgroundIcon();
+    QImage getForegroundIcon(const QSize& size);
+    QImage getBackgroundIcon(const QSize& size);
     bool isMovie();    
     bool hasMoreImages();
     void saveFrame(const Mat& img);

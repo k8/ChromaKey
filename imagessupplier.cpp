@@ -155,19 +155,19 @@ void ImagesSupplier::cutFrames(int n)
     }
 }
 
-QImage ImagesSupplier::getForegroundIcon()
+QImage ImagesSupplier::getForegroundIcon(const QSize &size)
 {
     QMutexLocker locker(&mutex);
     Mat icon;
-    resize(fgImage, icon, Size(50, 50));
+    resize(fgImage, icon, Size(size.width(), size.height()));
     return ImagesProcessor::fromCvMat(icon);
 }
 
-QImage ImagesSupplier::getBackgroundIcon()
+QImage ImagesSupplier::getBackgroundIcon(const QSize &size)
 {
     QMutexLocker locker(&mutex);
     Mat icon;
-    resize(bgImage, icon, Size(50, 50));
+    resize(bgImage, icon, Size(size.width(), size.height()));
     return ImagesProcessor::fromCvMat(icon);
 }
 
@@ -179,7 +179,7 @@ bool ImagesSupplier::isMovie()
 
 bool ImagesSupplier::hasMoreImages()
 {
-  return ! (fgFinished || bgFinished);
+  return ! fgFinished || ! bgFinished;
 }
 
 void ImagesSupplier::saveFrame(const Mat &img)

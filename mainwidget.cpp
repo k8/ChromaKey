@@ -38,10 +38,9 @@ MainWidget::MainWidget(QWidget *parent) :
 
     keyingThread->start();
 
-    setForegroundIcon(imagesSupplier->getForegroundIcon());
-    setBackgroundIcon(imagesSupplier->getBackgroundIcon());
+    setForegroundIcon(imagesSupplier->getForegroundIcon(ui->fgButton->size()));
+    setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
     changeColor(color);
-    ui->groupBox_2->setVisible(false);
     showPlayPauseButton(false);
 }
 
@@ -68,15 +67,12 @@ void MainWidget::connectObjects()
 
     connect(ui->segmentationCheck, SIGNAL(toggled(bool)), keyingParameters, SLOT(setSegmentaion(bool)));
 
-    connect(ui->ySpinBox, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setLuminance(int)));
+    connect(ui->luminanceSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setLuminance(int)));
     connect(ui->blueSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setBlue(int)));
     connect(ui->redSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setRed(int)));
 
     connect(ui->alphaSpinBox, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setAlpha(int)));
 
-    connect(ui->ySpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));
-    connect(ui->cRSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));
-    connect(ui->cBSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateColor(int)));     
 }
 
 void MainWidget::setForegroundIcon(const QImage& img)
@@ -91,8 +87,8 @@ void MainWidget::setBackgroundIcon(const QImage& img)
 
 void MainWidget::updateMovieLabel()
 {
-    keyingThread->update();
     showPlayPauseButton(imagesSupplier->isMovie());
+    keyingThread->update();
 }
 
 void MainWidget::changeColor(QRgb color)
@@ -192,7 +188,7 @@ void MainWidget::on_fgButton_clicked()
         }
         if (opened)
         {
-            setForegroundIcon(imagesSupplier->getForegroundIcon());
+            setForegroundIcon(imagesSupplier->getForegroundIcon(ui->fgButton->size()));
             updateMovieLabel();
         }
         else
@@ -220,7 +216,7 @@ void MainWidget::on_bgButton_clicked()
         }
         if (opened)
         {
-            setBackgroundIcon(imagesSupplier->getBackgroundIcon());
+            setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
             updateMovieLabel();
         }
         else
@@ -247,16 +243,6 @@ void MainWidget::on_saveButton_clicked()
         savingDialog->show();
         connect(savingDialog, SIGNAL(finished()), this, SLOT(savingFinished()));
     }
-}
-
-void MainWidget::updateColor(int)
-{
-    int y = ui->ySpinBox->value();
-    int cr = ui->cRSpinBox->value();
-    int cb = ui->cBSpinBox->value();
-
-    Color color(y, cr, cb);
-    changeColor(color.toRgb().rgb());
 }
 
 void MainWidget::on_hsvButton_clicked()

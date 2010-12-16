@@ -45,7 +45,6 @@ private:
 private slots:
     void on_ycbcrButton_clicked();
     void on_hsvButton_clicked();
-    void updateColor(int);
     void showPlayPauseButton(bool show);
     void movieFinished();
 
