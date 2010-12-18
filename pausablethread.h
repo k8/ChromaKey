@@ -19,10 +19,10 @@ public slots:
     void pause();
     void play();
     void update();
-    void wake();
 
 signals:
     void finished();
+    void started();
 
 protected:
     void run();

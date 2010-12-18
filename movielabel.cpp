@@ -54,7 +54,6 @@ void MovieLabel::scalePixmap()
 
 void MovieLabel::mousePressEvent(QMouseEvent *ev)
 {
-    qDebug() << width() << height();
     const QPixmap* pix = pixmap();
     if (pix && !pix->isNull())
     {

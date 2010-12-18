@@ -6,7 +6,7 @@ TEMPLATE = app
 SOURCES += main.cpp \
     mainwidget.cpp \
     keyingthread.cpp \
-    image.cpp \
+    imagesprocessor.cpp \
     movielabel.cpp \
     imagessupplier.cpp \
     filesavingdialog.cpp \
@@ -16,7 +16,7 @@ SOURCES += main.cpp \
     realtimethread.cpp
 HEADERS += mainwidget.h \
     keyingthread.h \
-    image.h \
+    imagesprocessor.h \
     movielabel.h \
     imagessupplier.h \
     filesavingdialog.h \

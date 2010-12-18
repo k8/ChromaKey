@@ -2,7 +2,7 @@
 #define KEYINGTHREAD_H
 
 #include "pausablethread.h"
-#include "image.h"
+#include "imagesprocessor.h"
 #include "imagessupplier.h"
 #include "opencv/cv.h"
 

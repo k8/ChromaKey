@@ -1,6 +1,6 @@
 #include "filesavingdialog.h"
 #include "ui_filesavingdialog.h"
-#include "image.h"
+#include "imagesprocessor.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDebug>

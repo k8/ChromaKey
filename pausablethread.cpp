@@ -51,15 +51,11 @@ bool PausableThread::isPaused()
     return ! played;
 }
 
-void PausableThread::wake()
-{
-    playContition.wakeAll();
-}
-
 void PausableThread::run()
 {
+    emit started();
     while (! isStopped())
-    {
+    {        
         if (isPaused())
         {
             QMutexLocker locker(&mutex);

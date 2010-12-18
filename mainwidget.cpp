@@ -36,12 +36,22 @@ MainWidget::MainWidget(QWidget *parent) :
 
     connectObjects();
 
-    keyingThread->start();
 
     setForegroundIcon(imagesSupplier->getForegroundIcon(ui->fgButton->size()));
     setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
     changeColor(color);
     showPlayPauseButton(false);
+
+    //<ycbcr testing settings>
+    openFile("img/input.avi", true);
+    openFile("img/new_york.avi", false);
+    ui->ycbcrButton->click();
+    changeColor(qRgb(45, 188, 179));
+    ui->alphaSpinBox->setValue(295);
+    connect(keyingThread, SIGNAL(started()), keyingThread, SLOT(update()));
+    //</ycbcr testing settings>
+
+    keyingThread->start();
 }
 
 MainWidget::~MainWidget()
@@ -53,11 +63,54 @@ MainWidget::~MainWidget()
     delete ui;
 }
 
+void MainWidget::openFile(const QString &file, bool fg)
+{
+    bool opened = false;
+    if (file.contains(".avi"))
+    {
+        if (fg)
+        {
+            if (imagesSupplier->openForegroundMovie(file))
+                opened = true;
+        }
+        else
+        {
+            if (imagesSupplier->openBackgroundMovie(file))
+                opened = true;
+        }
+    }
+    else
+    {
+        if (fg)
+        {
+            if (imagesSupplier->openForegroundImage(file))
+                opened = true;
+        }
+        else
+        {
+            if (imagesSupplier->openBackgroundImage(file))
+                opened = true;
+        }
+    }
+    if (opened)
+    {
+        if (fg)
+            setForegroundIcon(imagesSupplier->getForegroundIcon(ui->fgButton->size()));
+        else
+            setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
+        updateMovieLabel();
+    }
+    else
+    {
+        showOpenFailMessage(file);
+    }
+}
+
 void MainWidget::connectObjects()
 {
     connect(keyingThread, SIGNAL(frameReady(const QImage&, const QImage&)), this, SLOT(prepareFrame(const QImage&, const QImage&)));
     connect(keyingThread, SIGNAL(noMoreFrames()), this, SLOT(movieFinished()));
-    connect(keyingParameters, SIGNAL(parameterChanged()), keyingThread, SLOT(wake()));
+    connect(keyingParameters, SIGNAL(parameterChanged()), keyingThread, SLOT(update()));
 
     connect(ui->movieLabel, SIGNAL(colorChanged(QRgb)), this, SLOT(changeColor(QRgb)));
 

@@ -5,7 +5,7 @@
 #include "filesavingdialog.h"
 #include "realtimethread.h"
 #include "imagessupplier.h"
-#include "image.h"
+#include "imagesprocessor.h"
 #include "keyingparameters.h"
 
 namespace Ui {
@@ -19,6 +19,7 @@ public:
     ~MainWidget();
 
 protected:
+    void openFile(const QString& filename, bool fg);
     void connectObjects();
     void setForegroundIcon(const QImage& img);
     void setBackgroundIcon(const QImage& img);

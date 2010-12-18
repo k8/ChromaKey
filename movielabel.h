@@ -3,7 +3,7 @@
 
 #include <QLabel>
 #include <QMouseEvent>
-#include "image.h"
+#include "imagesprocessor.h"
 
 class MovieLabel : public QLabel
 {

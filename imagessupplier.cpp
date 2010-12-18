@@ -1,5 +1,5 @@
 #include "imagessupplier.h"
-#include "image.h"
+#include "imagesprocessor.h"
 #include <QDebug>
 #include <QMutexLocker>
 
