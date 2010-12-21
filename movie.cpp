@@ -1,29 +1,25 @@
 #include "movie.h"
 #include <QDebug>
 
-Movie::Movie()
-{
-}
-
-bool Movie::open(const QString &file)
+Movie::Movie(const QString &file)
+    : finished(false)
 {
     VideoCapture tmp;
-    bool opened = tmp.open(file.toStdString());
+    opened = tmp.open(file.toStdString());
     if (opened)
     {
         capture = tmp;
+        get(true);
     }
-    return opened;
 }
 
-const Mat& Movie::get()
+const Mat& Movie::get(bool next)
 {
-    getFrame();
+    if (next && ! getFrame())
+    {
+        finished = true;
+    }
     return image;
-}
-
-QImage Movie::getResizedQImage(const QSize& size)
-{
 }
 
 bool Movie::getFrame()

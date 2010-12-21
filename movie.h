@@ -7,16 +7,19 @@
 class Movie : public Image
 {
 public:
-    Movie();
-    bool open(const QString& file) = 0;
-    const Mat& get() = 0;
-    QImage getResizedQImage(const QSize& size) = 0;
+    Movie(const QString& file);
+    const Mat& get(bool next);
+    bool isMovie() {return true;}
+    bool isFinished() {return finished;}
+    int getFPS() {return capture.get(CV_CAP_PROP_FPS);}
+    int getProgress() { return capture.get(CV_CAP_PROP_POS_AVI_RATIO)*100.0; }
 
 protected:
     bool getFrame();
 
 private:
     VideoCapture capture;
+    bool finished;
 };
 
 #endif // MOVIE_H

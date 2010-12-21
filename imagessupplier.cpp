@@ -1,113 +1,62 @@
 #include "imagessupplier.h"
 #include "imagesprocessor.h"
+#include "imagefactory.h"
 #include <QDebug>
 #include <QMutexLocker>
 
 ImagesSupplier::ImagesSupplier(QRgb c, QSize size)
     : frameTime(1),
-      fgIsMovie(false), bgIsMovie(false),
-      fgOpened(false), bgOpened(false),
-      fgFinished(true), bgFinished(true),
       color(c)
 {
     Size imSize(size.width(), size.height());
-    createImage(fgImage, imSize);
-    createImage(bgImage, imSize);
-}
-
-void ImagesSupplier::createImage(Mat &img, Size size)
-{
-    img = Mat::ones(size, CV_8UC3);
-    ImagesProcessor::fill(img, color);
+    fgPic = new Image(imSize, c);
+    bgPic = new Image(imSize, c);
 }
 
 void ImagesSupplier::init(ImagesSupplier *is)
 {
-    if (is->fgIsMovie)
-        openForegroundMovie(is->fgFile);
-    else
-        openForegroundImage(is->fgFile);
-    if (is->bgIsMovie)
-        openBackgroundMovie(is->bgFile);
-    else
-        openBackgroundImage(is->bgFile);
+//    if (is->fgIsMovie)
+//        openForegroundMovie(is->fgFile);
+//    else
+//        openForegroundImage(is->fgFile);
+//    if (is->bgIsMovie)
+//        openBackgroundMovie(is->bgFile);
+//    else
+//        openBackgroundImage(is->bgFile);
 }
 
-bool ImagesSupplier::openForegroundMovie(const QString &file)
+bool ImagesSupplier::openBackground(const QString &file)
 {
-    QMutexLocker locker(&mutex);
-    bool opened = openMovie(file, fgCapture);
-    if (opened)
-    {
-        frameTime = 1000/fgCapture.get(CV_CAP_PROP_FPS);
-        getFrame(fgCapture, fgImage);
-        fgIsMovie = true;
-        fgFinished = false;
-        fgFile = file;
-        fgOpened = true;
-        if (! bgOpened)
-        {
-            createImage(bgImage, fgImage.size());
-        }
-    }
-    return opened;
+    bgPic = ImageFactory::create(file);
+    prepareImages();
+    return bgPic->isOpened();
 }
 
-bool ImagesSupplier::openBackgroundMovie(const QString &file)
+bool ImagesSupplier::openForeground(const QString &file)
 {
-    QMutexLocker locker(&mutex);
-    bool opened = openMovie(file, bgCapture);
-    if (opened)
-    {
-        if (frameTime == 1)
-            frameTime = 1000/bgCapture.get(CV_CAP_PROP_FPS);
-        getFrame(bgCapture, bgImage);
-        bgIsMovie = true;
-        bgFinished = false;
-        bgFile = file;
-        bgOpened = true;
-        if (! fgOpened)
-        {
-            createImage(fgImage, bgImage.size());
-        }
-    }
-    return opened;
+    fgPic = ImageFactory::create(file);
+    prepareImages();
+    return fgPic->isOpened();
 }
 
-bool ImagesSupplier::openForegroundImage(const QString &file)
+void ImagesSupplier::prepareImages()
 {
-    QMutexLocker locker(&mutex);
-    bool opened = openImage(file, fgImage);
-    if (opened)
+    if (fgPic->isOpened() && ! bgPic->isOpened())
     {
-        fgIsMovie = false;
-        fgFinished = true;
-        fgFile = file;
-        fgOpened = true;
-        if (! bgOpened)
-        {
-            createImage(bgImage, fgImage.size());
-        }
+        bgPic = new Image(fgPic->getSize(), color);
     }
-    return opened;
-}
-
-bool ImagesSupplier::openBackgroundImage(const QString &file)
-{
-    QMutexLocker locker(&mutex);
-    bool opened = openImage(file, bgImage);
-    if (opened)
+    if (bgPic->isOpened() && ! fgPic->isOpened())
     {
-        bgIsMovie = false;
-        bgFinished = true;
-        bgFile = file;
-        bgOpened = true;
-        if (! fgOpened)
-        {
-            createImage(fgImage, bgImage.size());
-        }
+        fgPic = new Image(bgPic->getSize(), color);
     }
-    return opened;
+    if (bgPic->isMovie())
+    {
+        frameTime = 1000/(double)((Movie*)bgPic)->getFPS();
+    }
+    if (fgPic->isMovie())
+    {
+        frameTime = 1000/(double)((Movie*)fgPic)->getFPS();
+    }
 }
 
 bool ImagesSupplier::save(const QString &file)
@@ -119,23 +68,13 @@ bool ImagesSupplier::save(const QString &file)
 const Mat& ImagesSupplier::getFgImage(bool isPaused)
 {
     QMutexLocker locker(&mutex);
-    if (fgIsMovie && ! isPaused && ! fgFinished)
-    {
-        if (! getFrame(fgCapture, fgImage))
-            fgFinished = true;
-    }
-    return fgImage;
+    return fgPic->get(! isPaused);
 }
 
 const Mat& ImagesSupplier::getBgImage(bool isPaused)
 {
     QMutexLocker locker(&mutex);
-    if (bgIsMovie && ! isPaused && ! bgFinished)
-    {
-        if (! getFrame(bgCapture, bgImage))
-            bgFinished = true;
-    }
-    return bgImage;
+    return bgPic->get(! isPaused);
 }
 
 double ImagesSupplier::getFrameTime()
@@ -149,37 +88,32 @@ void ImagesSupplier::cutFrames(int n)
     QMutexLocker locker(&mutex);
     for (int i = 0; i < n; i++)
     {
-        Mat frame;
-        getFrame(fgCapture, frame);
-        getFrame(bgCapture, frame);
+        fgPic->get(true);
+        bgPic->get(true);
     }
 }
 
 QImage ImagesSupplier::getForegroundIcon(const QSize &size)
 {
     QMutexLocker locker(&mutex);
-    Mat icon;
-    resize(fgImage, icon, Size(size.width(), size.height()));
-    return ImagesProcessor::fromCvMat(icon);
+    return fgPic->getResizedQImage(size);
 }
 
 QImage ImagesSupplier::getBackgroundIcon(const QSize &size)
 {
     QMutexLocker locker(&mutex);
-    Mat icon;
-    resize(bgImage, icon, Size(size.width(), size.height()));
-    return ImagesProcessor::fromCvMat(icon);
+    return bgPic->getResizedQImage(size);
 }
 
 bool ImagesSupplier::isMovie()
 {
-    QMutexLocker locker(&mutex);
-    return fgIsMovie || bgIsMovie;
+    QMutexLocker locker(&mutex);    
+    return fgPic->isMovie() || bgPic->isMovie();
 }
 
 bool ImagesSupplier::hasMoreImages()
 {
-  return ! fgFinished || ! bgFinished;
+  return ! fgPic->isFinished() || ! bgPic->isFinished();
 }
 
 void ImagesSupplier::saveFrame(const Mat &img)
@@ -207,66 +141,15 @@ void ImagesSupplier::saveFrame(const Mat &img)
 int ImagesSupplier::getProgress()
 {
     int progress = 100;
-    if (fgIsMovie)
+    if (fgPic->isMovie())
     {
-        progress = fgCapture.get(CV_CAP_PROP_POS_AVI_RATIO)*100.0;
+        progress = ((Movie*)fgPic)->getProgress();
     }
-    else if (bgIsMovie)
+    else if (bgPic->isMovie())
     {
-        progress = bgCapture.get(CV_CAP_PROP_POS_AVI_RATIO)*100.0;
+        progress = ((Movie*)bgPic)->getProgress();
     }
-//    qDebug() << fgCapture.get(CV_CAP_PROP_POS_AVI_RATIO);
-//    qDebug() << bgCapture.get(CV_CAP_PROP_POS_AVI_RATIO);
-//    qDebug() << progress;
     return progress;
-}
-
-bool ImagesSupplier::getFrame(VideoCapture &cap, Mat &mat)
-{
-    Mat frame;
-    try
-    {
-        if (cap.grab() && cap.retrieve(frame))
-        {
-            frame.copyTo(mat);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    catch (cv::Exception& e )
-    {
-        qDebug() << e.what();
-    }
-    return false;
-}
-
-bool ImagesSupplier::openImage(const QString& file, Mat& image)
-{
-    bool opened = true;
-    Mat tmp = imread(file.toStdString());
-    if (tmp.data == NULL)
-    {
-        opened = false;
-    }
-    else
-    {
-        image = tmp;
-    }
-    return opened;
-}
-
-bool ImagesSupplier::openMovie(const QString& file, VideoCapture &capture)
-{
-    VideoCapture tmp;
-    bool opened = tmp.open(file.toStdString());
-    if (opened)
-    {
-        capture = tmp;
-    }
-    return opened;
 }
 
 bool ImagesSupplier::openVideoWriter(const QString &file, const Mat &img)
@@ -279,14 +162,14 @@ bool ImagesSupplier::openVideoWriter(const QString &file, const Mat &img)
 //    qDebug() << "CV_FOURCC('U', '2', '6', '3') " << CV_FOURCC('U', '2', '6', '3') ;
 //    qDebug() << "CV_FOURCC('I', '2', '6', '3') " << CV_FOURCC('I', '2', '6', '3') ;
 //    qDebug() << "CV_FOURCC('F', 'L', 'V', '1') " << CV_FOURCC('F', 'L', 'V', '1') ;
-   int fourcc = bgCapture.get(CV_CAP_PROP_FOURCC);
-   int fps = bgCapture.get(CV_CAP_PROP_FPS);    
-   if (fgIsMovie)
-   {
-       fourcc = fgCapture.get(CV_CAP_PROP_FOURCC);
-       fps = fgCapture.get(CV_CAP_PROP_FPS);
-   }
-   if (fourcc ==  CV_FOURCC('M','J','P','G'))
-       fourcc = CV_FOURCC('F', 'L', 'V', '1');
-   return videoWriter.open(file.toStdString(), fourcc, fps, Size(img.cols, img.rows));
+//   int fourcc = bgCapture.get(CV_CAP_PROP_FOURCC);
+//   int fps = bgCapture.get(CV_CAP_PROP_FPS);
+//   if (fgIsMovie)
+//   {
+//       fourcc = fgCapture.get(CV_CAP_PROP_FOURCC);
+//       fps = fgCapture.get(CV_CAP_PROP_FPS);
+//   }
+//   if (fourcc ==  CV_FOURCC('M','J','P','G'))
+//       fourcc = CV_FOURCC('F', 'L', 'V', '1');
+//   return videoWriter.open(file.toStdString(), fourcc, fps, Size(img.cols, img.rows));
 }

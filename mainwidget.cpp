@@ -66,31 +66,15 @@ MainWidget::~MainWidget()
 void MainWidget::openFile(const QString &file, bool fg)
 {
     bool opened = false;
-    if (file.contains(".avi"))
+    if (fg)
     {
-        if (fg)
-        {
-            if (imagesSupplier->openForegroundMovie(file))
-                opened = true;
-        }
-        else
-        {
-            if (imagesSupplier->openBackgroundMovie(file))
-                opened = true;
-        }
+        if (imagesSupplier->openForeground(file))
+            opened = true;
     }
     else
     {
-        if (fg)
-        {
-            if (imagesSupplier->openForegroundImage(file))
-                opened = true;
-        }
-        else
-        {
-            if (imagesSupplier->openBackgroundImage(file))
-                opened = true;
-        }
+        if (imagesSupplier->openBackground(file))
+            opened = true;
     }
     if (opened)
     {
@@ -228,18 +212,7 @@ void MainWidget::on_fgButton_clicked()
     QString file = QFileDialog::getOpenFileName(this, "Open foreground file", QDir::currentPath(), "Movies (*.avi);;Images (*.jpg)");
     if (file != QString())
     {
-        bool opened = false;
-        if (file.contains(".avi"))
-        {
-            if (imagesSupplier->openForegroundMovie(file))
-                opened = true;
-        }
-        else
-        {
-            if (imagesSupplier->openForegroundImage(file))
-                opened = true;
-        }
-        if (opened)
+        if (imagesSupplier->openForeground(file))
         {
             setForegroundIcon(imagesSupplier->getForegroundIcon(ui->fgButton->size()));
             updateMovieLabel();
@@ -256,18 +229,7 @@ void MainWidget::on_bgButton_clicked()
     QString file = QFileDialog::getOpenFileName(this, "Open background file", QDir::currentPath(), "Movies (*.avi);;Images (*.jpg)");
     if (file != QString())
     {
-        bool opened = false;
-        if (file.contains(".avi"))
-        {
-            if (imagesSupplier->openBackgroundMovie(file))
-                opened = true;
-        }
-        else
-        {
-            if (imagesSupplier->openBackgroundImage(file))
-                opened = true;
-        }
-        if (opened)
+        if (imagesSupplier->openBackground(file))
         {
             setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
             updateMovieLabel();
