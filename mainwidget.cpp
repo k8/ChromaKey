@@ -42,14 +42,14 @@ MainWidget::MainWidget(QWidget *parent) :
     changeColor(color);
     showPlayPauseButton(false);
 
-    //<ycbcr testing settings>
-    openFile("img/input.avi", true);
-    openFile("img/new_york.avi", false);
-    ui->ycbcrButton->click();
-    changeColor(qRgb(45, 188, 179));
-    ui->alphaSpinBox->setValue(295);
-    connect(keyingThread, SIGNAL(started()), keyingThread, SLOT(update()));
-    //</ycbcr testing settings>
+//    <ycbcr testing settings>
+//    openFile("img/input.avi", true);
+//    openFile("img/new_york.avi", false);
+//    ui->ycbcrButton->click();
+//    changeColor(qRgb(45, 188, 179));
+//    ui->alphaSpinBox->setValue(295);
+//    connect(keyingThread, SIGNAL(started()), keyingThread, SLOT(update()));
+//    </ycbcr testing settings>
 
     keyingThread->start();
 }

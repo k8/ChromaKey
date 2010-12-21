@@ -13,7 +13,10 @@ SOURCES += main.cpp \
     keyingparameters.cpp \
     pausablethread.cpp \
     savingthread.cpp \
-    realtimethread.cpp
+    realtimethread.cpp \
+    image.cpp \
+    picture.cpp \
+    movie.cpp
 HEADERS += mainwidget.h \
     keyingthread.h \
     imagesprocessor.h \
@@ -23,7 +26,10 @@ HEADERS += mainwidget.h \
     keyingparameters.h \
     pausablethread.h \
     savingthread.h \
-    realtimethread.h
+    realtimethread.h \
+    image.h \
+    picture.h \
+    movie.h
 FORMS += mainwidget.ui \
     filesavingdialog.ui
 CONFIG += link_pkgconfig
