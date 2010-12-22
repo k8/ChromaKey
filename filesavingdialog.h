@@ -30,6 +30,7 @@ private:
     Ui::FileSavingDialog *ui;
     ImagesSupplier* saveSupplier;
     SavingThread* saveThread;
+    QString fileName;
 };
 
 #endif // FILESAVINGDIALOG_H

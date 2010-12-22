@@ -13,8 +13,11 @@ FileSavingDialog::FileSavingDialog(ImagesSupplier *is, KeyingParameters* kp, con
     ui(new Ui::FileSavingDialog)
 {
     ui->setupUi(this);
+    QStringList list = file.split(QDir::separator());
+    setWindowTitle("Saving "+list.last());
+    fileName = list.last();
     saveSupplier = new ImagesSupplier();
-    saveSupplier->init(is);
+    saveSupplier->init(is->getForegroundFile(), is->getBackgroundFile());
     saveThread = new SavingThread(saveSupplier, new ImagesProcessor(kp));
     saveThread->play();
     connect(saveThread, SIGNAL(finished()), this, SLOT(savingFinished()));
@@ -50,7 +53,7 @@ void FileSavingDialog::closeEvent(QCloseEvent *event)
     if (saveThread->isRunning())
     {
         QMessageBox msgBox;
-        msgBox.setText("Do you want to stop saving?");
+        msgBox.setText("Do you want to stop saving file "+fileName+"?");
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
         int ret = msgBox.exec();

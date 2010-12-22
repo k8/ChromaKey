@@ -42,6 +42,7 @@ private:
     ImagesProcessor* imagesProcessor;
     RealTimeThread* keyingThread;
     KeyingParameters* keyingParameters;
+    QString filesPath;
 
 private slots:
     void on_ycbcrButton_clicked();

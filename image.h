@@ -16,19 +16,31 @@ public:
     Image() {}
     Image(const QString&);
     Image(const Size& size, const QRgb& color);
+    Image(const Image& other);
     Size getSize() {return image.size();}
     virtual const Mat& get(bool next);
     virtual QImage getResizedQImage(const QSize& size);
     bool isOpened() {return opened;}
-    virtual bool isMovie() {return false;}
+    virtual bool isMovie()
+    {
+        return false;
+    }
     virtual bool isFinished() {return true;}
     const QString& getFile() {return file;}
-    int getFPS() {return 1;}
-    int getProgress() { return 100;}
 
 protected:
     Mat image;
     bool opened;
+    QString file;
+};
+
+class ImageSaver
+{
+public:
+    ImageSaver(const QString& file);
+    virtual bool save(const Mat& image);
+    virtual int getProgress() { return 100;}
+protected:
     QString file;
 };
 

@@ -17,10 +17,13 @@ class ImagesSupplier : public QObject
 {
 public:
     ImagesSupplier(QRgb color = 0, QSize size = QSize(0, 0));
-    void init(ImagesSupplier* is);
+    void init(const QString& fgFile, const QString& bgFile);
 
     bool openForeground(const QString& file);
     bool openBackground(const QString& file);
+
+    const QString& getForegroundFile();
+    const QString& getBackgroundFile();
 
     bool save(const QString& file);
     const Mat& getFgImage(bool isPaused);
@@ -35,10 +38,10 @@ public:
     int getProgress();
 
 private:
+    bool open(Image** img, const QString& file);
     void prepareImages();
 
     void init(QRgb c, QSize size);
-    bool openVideoWriter(const QString& file, const Mat& img);    
 
     QMutex mutex;
     double frameTime;
@@ -48,6 +51,7 @@ private:
 
     Image* fgPic;    
     Image* bgPic;
+    ImageSaver* saver;
 };
 
 #endif // IMAGESSUPPLIER_H

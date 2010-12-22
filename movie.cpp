@@ -9,8 +9,15 @@ Movie::Movie(const QString &file)
     if (opened)
     {
         capture = tmp;
+        this->file = file;
         get(true);
     }
+}
+
+Movie::Movie(const Movie &other)
+{
+    capture = capture;
+    finished = finished;
 }
 
 const Mat& Movie::get(bool next)
@@ -39,3 +46,23 @@ bool Movie::getFrame()
     }
     return false;
 }
+
+MovieSaver::MovieSaver(const QString &file, Movie *movie, Size size)
+    : ImageSaver(file), movie(movie)
+{
+    int fourcc = movie->getFOURCC();
+    if (fourcc ==  CV_FOURCC('M','J','P','G'))
+        fourcc = CV_FOURCC('F', 'L', 'V', '1');
+    videoWriter.open(file.toStdString(), fourcc, movie->getFPS(), size);
+}
+
+bool MovieSaver::save(const Mat &image)
+{
+    if (videoWriter.isOpened())
+    {
+        videoWriter << image;
+        return true;
+    }
+    return false;
+}
+

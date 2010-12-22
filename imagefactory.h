@@ -8,7 +8,8 @@ class ImageFactory
 {
 public:
     ImageFactory();
-    static Image* create(const QString& file);
+    static Image* createImage(const QString& file);
+    static ImageSaver* createSaver(const QString& file, Image* fg, Image* bg, const Mat& img);
 };
 
 #endif // IMAGEFACTORY_H

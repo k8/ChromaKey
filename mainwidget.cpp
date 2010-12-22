@@ -14,7 +14,7 @@ MainWidget::MainWidget(QWidget *parent) :
     savingDialog(0)
 {
     ui->setupUi(this);    
-
+    filesPath = QDir::currentPath()+QDir::separator()+"img";
     QRgb color = qRgb(0, 0, 0);
     QSize movieSize(300, 200);    
 
@@ -69,19 +69,21 @@ void MainWidget::openFile(const QString &file, bool fg)
     if (fg)
     {
         if (imagesSupplier->openForeground(file))
+        {
+            setForegroundIcon(imagesSupplier->getForegroundIcon(ui->fgButton->size()));
             opened = true;
+        }
     }
     else
     {
         if (imagesSupplier->openBackground(file))
+        {
+            setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
             opened = true;
+        }
     }
     if (opened)
     {
-        if (fg)
-            setForegroundIcon(imagesSupplier->getForegroundIcon(ui->fgButton->size()));
-        else
-            setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
         updateMovieLabel();
     }
     else
@@ -209,35 +211,19 @@ void MainWidget::on_playPauseButton_clicked()
 
 void MainWidget::on_fgButton_clicked()
 {    
-    QString file = QFileDialog::getOpenFileName(this, "Open foreground file", QDir::currentPath(), "Movies (*.avi);;Images (*.jpg)");
+    QString file = QFileDialog::getOpenFileName(this, "Open foreground file", filesPath, "Movies (*.avi);;Images (*.jpg)");
     if (file != QString())
     {
-        if (imagesSupplier->openForeground(file))
-        {
-            setForegroundIcon(imagesSupplier->getForegroundIcon(ui->fgButton->size()));
-            updateMovieLabel();
-        }
-        else
-        {
-            showOpenFailMessage(file);
-        }
+        openFile(file, true);
     }
 }
 
 void MainWidget::on_bgButton_clicked()
 {
-    QString file = QFileDialog::getOpenFileName(this, "Open background file", QDir::currentPath(), "Movies (*.avi);;Images (*.jpg)");
+    QString file = QFileDialog::getOpenFileName(this, "Open background file", filesPath, "Movies (*.avi);;Images (*.jpg)");
     if (file != QString())
     {
-        if (imagesSupplier->openBackground(file))
-        {
-            setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
-            updateMovieLabel();
-        }
-        else
-        {
-            showOpenFailMessage(file);
-        }
+        openFile(file, false);
     }
 }
 
@@ -251,7 +237,8 @@ void MainWidget::on_saveButton_clicked()
 {
     QString filter = "Images (*.jpg)";
     if (imagesSupplier->isMovie())
-        filter = "Movies (*.avi)";    QString file = QFileDialog::getSaveFileName(this, "Save file", QDir::currentPath(), filter);
+        filter = "Movies (*.avi)";
+    QString file = QFileDialog::getSaveFileName(this, "Save file", filesPath, filter);
     if (file != QString())
     {
         savingDialog = new FileSavingDialog(imagesSupplier, keyingParameters, file, this);
