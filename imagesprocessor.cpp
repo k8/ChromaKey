@@ -3,10 +3,12 @@
 #include <QColor>
 #include <QMutexLocker>
 #include <cmath>
+#include "matte.h"
 
 ImagesProcessor::ImagesProcessor(KeyingParameters *keyingParams, QSize size)
     : kp(keyingParams), imageSize(size)
 {
+//    namedWindow("DM", 1);
 }
 
 QImage ImagesProcessor::scaledFromCvMat(const Mat& inMat)
@@ -108,6 +110,9 @@ void ImagesProcessor::keying(const Mat &fg, const Mat &bg, Mat &out)
         break;
     case KeyingParameters::KA_YCbCr:
         keyingYCbCr(fg, bg, out);
+        break;
+    case KeyingParameters::KA_DM:
+        keyingDM(fg, bg, out);
         break;
     }
 }
@@ -251,6 +256,18 @@ void ImagesProcessor::keyingYCbCr(const Mat &fg, const Mat &bg, Mat &out)
         }
     }   
     cvtColor(bgYCrCb, roi, CV_YCrCb2BGR);
+}
+
+void ImagesProcessor::keyingDM(const Mat &fg, const Mat &bg, Mat &out)
+{
+    Mat a;
+    Mat b;
+    prepareSize(fg, bg, a, b);
+    b.copyTo(out);
+    DifferenceMatte matte(a.size());
+    matte.compute(a);
+    matte.invert();
+    matte.multiply(a, b, out);
 }
 
 void ImagesProcessor::setSize(QSize size)

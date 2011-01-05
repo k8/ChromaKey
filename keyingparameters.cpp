@@ -1,6 +1,6 @@
 #include "keyingparameters.h"
 
-KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, int hue, int saturation, int value, int luminance, int blue, int red, int alpha, bool segmentation)
+KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, int hue, int saturation, int value, int luminance, int blue, int red, int alpha, bool segmentation, int threshold)
     :
     keyingAlgorithm(keyingAlgorithm),
     color(color),
@@ -11,7 +11,8 @@ KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, 
     blue(blue),
     red(red),
     alpha(alpha),
-    segmentation(segmentation)
+    segmentation(segmentation),
+    threshold(threshold)
 {
 }
 
@@ -82,5 +83,12 @@ void KeyingParameters::setSegmentaion(bool s)
 {
     QMutexLocker locker(&mutex);
     segmentation = s;
+    emit parameterChanged();
+}
+
+void KeyingParameters::setThreshold(int t)
+{
+    QMutexLocker locker(&mutex);
+    threshold = t;
     emit parameterChanged();
 }

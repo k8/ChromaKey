@@ -26,6 +26,7 @@ public:
 protected:
     void keyingHSV(const Mat& fg, const Mat& bg, Mat& out);
     void keyingYCbCr(const Mat& fg, const Mat& bg, Mat& out);
+    void keyingDM(const Mat& fg, const Mat& bg, Mat& out);
     void resize(const Mat& mat, Mat& out, double fact);
     void prepareSize(const Mat& a, const Mat& b, Mat& c, Mat& d);
     void segmentation(Mat& in);
@@ -33,7 +34,9 @@ protected:
 private:
     QMutex mutex;
     KeyingParameters* kp;
-    QSize imageSize;
+    QSize imageSize;    
+
+    Mat tmp; // temporary - for difference matte
 
     class Color : public QColor
     {

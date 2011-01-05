@@ -29,7 +29,8 @@ MainWidget::MainWidget(QWidget *parent) :
                                             ui->blueSlider->value(),
                                             ui->redSlider->value(),
                                             ui->alphaSpinBox->value(),
-                                            ui->segmentationCheck->isChecked());
+                                            ui->segmentationCheck->isChecked(),
+                                            ui->dmSlider->value());
     imagesProcessor = new ImagesProcessor(keyingParameters, movieSize);
     keyingThread = new RealTimeThread(imagesSupplier, imagesProcessor);
     ui->movieLabel->init(color, movieSize, imagesProcessor);
@@ -112,6 +113,7 @@ void MainWidget::connectObjects()
 
     connect(ui->alphaSpinBox, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setAlpha(int)));
 
+    connect(ui->dmSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setThreshold(int)));
 }
 
 void MainWidget::setForegroundIcon(const QImage& img)
@@ -255,4 +257,9 @@ void MainWidget::on_hsvButton_clicked()
 void MainWidget::on_ycbcrButton_clicked()
 {
     keyingParameters->setKeyingAlgorithm(KeyingParameters::KA_YCbCr);
+}
+
+void MainWidget::on_dmButton_clicked()
+{
+    keyingParameters->setKeyingAlgorithm(KeyingParameters::KA_DM);
 }

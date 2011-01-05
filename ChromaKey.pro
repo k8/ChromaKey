@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     realtimethread.cpp \
     image.cpp \
     movie.cpp \
-    imagefactory.cpp
+    imagefactory.cpp \
+    matte.cpp
 HEADERS += mainwidget.h \
     keyingthread.h \
     imagesprocessor.h \
@@ -29,7 +30,8 @@ HEADERS += mainwidget.h \
     realtimethread.h \
     image.h \
     movie.h \
-    imagefactory.h
+    imagefactory.h \
+    matte.h
 FORMS += mainwidget.ui \
     filesavingdialog.ui
 CONFIG += link_pkgconfig

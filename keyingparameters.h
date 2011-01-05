@@ -15,6 +15,7 @@ public:
     {
         KA_HSV,
         KA_YCbCr,
+        KA_DM
     };
     KeyingParameters(KeyingAlgorithm keyingAlgorithm,
                      QRgb color,
@@ -25,7 +26,8 @@ public:
                      int blue,
                      int red,
                      int alpha,
-                     bool segmentation);
+                     bool segmentation,
+                     int threshold);
     KeyingAlgorithm getKeyingAlgorithm() {QMutexLocker locker(&mutex); return keyingAlgorithm; }
     QColor getColor() {QMutexLocker locker(&mutex); return QColor(color); }
     int getHue() {QMutexLocker locker(&mutex); return hue; }
@@ -36,6 +38,7 @@ public:
     int getRed() {QMutexLocker locker(&mutex); return red; }
     int getAlpha() {QMutexLocker locker(&mutex); return alpha;}
     bool getSegmentation() {QMutexLocker locker(&mutex); return segmentation; }
+    int getThreshold() {QMutexLocker locker(&mutex); return threshold; }
 
 public slots:
     void setKeyingAlgorithm(KeyingAlgorithm ka);
@@ -48,6 +51,7 @@ public slots:
     void setRed(int r);
     void setAlpha(int a);
     void setSegmentaion(bool s);
+    void setThreshold(int t);
 
 signals:
     void parameterChanged();
@@ -63,6 +67,7 @@ private:
     int red;
     int alpha;
     bool segmentation;
+    int threshold;
 
     QMutex mutex;
 };

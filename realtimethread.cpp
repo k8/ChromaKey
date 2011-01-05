@@ -7,7 +7,7 @@ RealTimeThread::RealTimeThread(ImagesSupplier *is, ImagesProcessor *ip)
 
 void RealTimeThread::waitForFrame()
 {
-    if (imagesSupplier->isMovie())
+    if (imagesSupplier->isMovie() && ! isPaused())
     {
         int frameTime = imagesSupplier->getFrameTime();
         int waitTime = frameTime-time.elapsed();

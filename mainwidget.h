@@ -45,6 +45,7 @@ private:
     QString filesPath;
 
 private slots:
+    void on_dmButton_clicked();
     void on_ycbcrButton_clicked();
     void on_hsvButton_clicked();
     void showPlayPauseButton(bool show);

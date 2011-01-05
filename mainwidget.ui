@@ -199,6 +199,26 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
+          <widget class="QSlider" name="dmSlider">
+           <property name="maximum">
+            <number>255</number>
+           </property>
+           <property name="value">
+            <number>122</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="dmButton">
+           <property name="text">
+            <string>Difference Matte</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QRadioButton" name="hsvButton">
            <property name="text">
             <string>HSV keying</string>
