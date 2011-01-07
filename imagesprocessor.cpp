@@ -8,7 +8,6 @@
 ImagesProcessor::ImagesProcessor(KeyingParameters *keyingParams, QSize size)
     : kp(keyingParams), imageSize(size)
 {
-//    namedWindow("DM", 1);
 }
 
 QImage ImagesProcessor::scaledFromCvMat(const Mat& inMat)
@@ -266,8 +265,16 @@ void ImagesProcessor::keyingDM(const Mat &fg, const Mat &bg, Mat &out)
     b.copyTo(out);
     DifferenceMatte matte(a.size());
     matte.compute(a);
-    matte.invert();
-    matte.multiply(a, b, out);
+    matte.scale(kp->getWhite(), kp->getBlack());
+    if (kp->getMatteVisible())
+    {
+        out = matte.getMat();
+    }
+    else
+    {
+        matte.invert();
+        matte.multiply(a, b, out);
+    }
 }
 
 void ImagesProcessor::setSize(QSize size)

@@ -1,6 +1,6 @@
 #include "keyingparameters.h"
 
-KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, int hue, int saturation, int value, int luminance, int blue, int red, int alpha, bool segmentation, int threshold)
+KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, int hue, int saturation, int value, int luminance, int blue, int red, int alpha, bool segmentation, int white, int black, bool matteVisible)
     :
     keyingAlgorithm(keyingAlgorithm),
     color(color),
@@ -12,7 +12,9 @@ KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, 
     red(red),
     alpha(alpha),
     segmentation(segmentation),
-    threshold(threshold)
+    white(white),
+    black(black),
+    matteVisible(matteVisible)
 {
 }
 
@@ -86,9 +88,23 @@ void KeyingParameters::setSegmentaion(bool s)
     emit parameterChanged();
 }
 
-void KeyingParameters::setThreshold(int t)
+void KeyingParameters::setWhite(int w)
 {
     QMutexLocker locker(&mutex);
-    threshold = t;
+    white = w;
+    emit parameterChanged();
+}
+
+void KeyingParameters::setBlack(int b)
+{
+    QMutexLocker locker(&mutex);
+    black = b;
+    emit parameterChanged();
+}
+
+void KeyingParameters::setMatteVisible(bool v)
+{
+    QMutexLocker locker(&mutex);
+    matteVisible = v;
     emit parameterChanged();
 }

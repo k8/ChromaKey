@@ -1,4 +1,6 @@
 #include "matte.h"
+#include <QDebug>
+#include <opencv/highgui.h>
 
 Matte::Matte(Size size)
 {
@@ -30,6 +32,13 @@ void Matte::multiply(const Mat &a, const Mat &b, Mat &out)
     }
 }
 
+void Matte::scale(int white, int black)
+{
+    mat *= 256.0/white;
+    mat -= black;
+    mat *= 256.0/black;
+}
+
 DifferenceMatte::DifferenceMatte(Size size)
     : Matte(size)
 {
@@ -44,13 +53,8 @@ void DifferenceMatte::compute(const Mat &a)
         {
             Vec3b elem = a.at<Vec3b>(i,j);
             int value = elem[1]-max(elem[2], elem[2]);
-            if (value < 50) value = 0;
-            if (value > 80) value *= 2;
-//            value = value < 0 ? 0 : value;
-//            value *= 2;
-            value = value > 255 ? 255 : value;
-//            value = value < 0 ? 0 : value;
-            mat.at<uchar>(i, j) =  value;
+            if (value < 0) value = 0;
+            mat.at<uchar>(i, j) = value;
         }
     }
 }

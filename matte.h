@@ -10,6 +10,9 @@ public:
     Matte(Size size);
     void invert();
     void multiply(const Mat& a, const Mat& b, Mat& out);
+    void scale(int white, int black);
+    const Mat& getMat() {return mat;}
+
 protected:
     Mat mat;
 };

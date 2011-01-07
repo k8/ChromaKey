@@ -27,7 +27,9 @@ public:
                      int red,
                      int alpha,
                      bool segmentation,
-                     int threshold);
+                     int white,
+                     int black,
+                     bool matteVisible);
     KeyingAlgorithm getKeyingAlgorithm() {QMutexLocker locker(&mutex); return keyingAlgorithm; }
     QColor getColor() {QMutexLocker locker(&mutex); return QColor(color); }
     int getHue() {QMutexLocker locker(&mutex); return hue; }
@@ -38,7 +40,9 @@ public:
     int getRed() {QMutexLocker locker(&mutex); return red; }
     int getAlpha() {QMutexLocker locker(&mutex); return alpha;}
     bool getSegmentation() {QMutexLocker locker(&mutex); return segmentation; }
-    int getThreshold() {QMutexLocker locker(&mutex); return threshold; }
+    int getWhite() {QMutexLocker locker(&mutex); return white; }
+    int getBlack() {QMutexLocker locker(&mutex); return black; }
+    bool getMatteVisible() {QMutexLocker locker(&mutex); return matteVisible; }
 
 public slots:
     void setKeyingAlgorithm(KeyingAlgorithm ka);
@@ -51,7 +55,9 @@ public slots:
     void setRed(int r);
     void setAlpha(int a);
     void setSegmentaion(bool s);
-    void setThreshold(int t);
+    void setWhite(int w);
+    void setBlack(int b);
+    void setMatteVisible(bool v);
 
 signals:
     void parameterChanged();
@@ -67,7 +73,9 @@ private:
     int red;
     int alpha;
     bool segmentation;
-    int threshold;
+    int white;
+    int black;
+    bool matteVisible;
 
     QMutex mutex;
 };

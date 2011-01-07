@@ -30,7 +30,9 @@ MainWidget::MainWidget(QWidget *parent) :
                                             ui->redSlider->value(),
                                             ui->alphaSpinBox->value(),
                                             ui->segmentationCheck->isChecked(),
-                                            ui->dmSlider->value());
+                                            ui->dmSlider->value(),
+                                            ui->dmSlider2->value(),
+                                            ui->showDmBox->isChecked());
     imagesProcessor = new ImagesProcessor(keyingParameters, movieSize);
     keyingThread = new RealTimeThread(imagesSupplier, imagesProcessor);
     ui->movieLabel->init(color, movieSize, imagesProcessor);
@@ -113,7 +115,9 @@ void MainWidget::connectObjects()
 
     connect(ui->alphaSpinBox, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setAlpha(int)));
 
-    connect(ui->dmSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setThreshold(int)));
+    connect(ui->dmSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setWhite(int)));
+    connect(ui->dmSlider2, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setBlack(int)));
+    connect(ui->showDmBox, SIGNAL(toggled(bool)), keyingParameters, SLOT(setMatteVisible(bool)));
 }
 
 void MainWidget::setForegroundIcon(const QImage& img)
