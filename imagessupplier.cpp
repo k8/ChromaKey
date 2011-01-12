@@ -137,6 +137,7 @@ bool ImagesSupplier::isMovie()
 
 bool ImagesSupplier::hasMoreImages()
 {
+    QMutexLocker locker(&mutex);
     if (saver && saver->getProgress() == 100)
         return false;
     return ! fgPic->isFinished() || ! bgPic->isFinished();
@@ -144,10 +145,25 @@ bool ImagesSupplier::hasMoreImages()
 
 void ImagesSupplier::saveFrame(const Mat &img)
 {
+    QMutexLocker locker(&mutex);
     saver->save(img);
 }
 
 int ImagesSupplier::getProgress()
 {
+    QMutexLocker locker(&mutex);
     return saver->getProgress();
+}
+
+void ImagesSupplier::setProgress(int p)
+{
+    QMutexLocker locker(&mutex);
+    if (fgPic->isMovie())
+    {
+        (static_cast<Movie*>(fgPic))->setProgress(p);
+    }
+    if (bgPic->isMovie())
+    {
+        (static_cast<Movie*>(bgPic))->setProgress(p);
+    }
 }

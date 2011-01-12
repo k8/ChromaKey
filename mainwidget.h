@@ -30,6 +30,8 @@ protected:
     void showFailMessage(const QString& text);
     void showOpenFailMessage(const QString& file);
 
+    KeyingParameters::KeyingAlgorithm algorithmName(int index);
+
 protected slots:
     void prepareFrame(const QImage& big, const QImage& small);
     void changeColor(QRgb color);
@@ -45,9 +47,7 @@ private:
     QString filesPath;
 
 private slots:
-    void on_dmButton_clicked();
-    void on_ycbcrButton_clicked();
-    void on_hsvButton_clicked();
+    void on_tabWidget_currentChanged(int index);
     void showPlayPauseButton(bool show);
     void movieFinished();
 
@@ -56,6 +56,8 @@ private slots:
     void on_fgButton_clicked();
     void on_playPauseButton_clicked();
     void on_saveButton_clicked();
+
+    void shiftMovie();
 };
 
 #endif // MAINWIDGET_H

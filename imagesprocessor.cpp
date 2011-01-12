@@ -245,8 +245,6 @@ void ImagesProcessor::keyingYCbCr(const Mat &fg, const Mat &bg, Mat &out)
 //                bgElem[0] = Y_norm-kp->getLuminance()*K_FG;
 //                bgElem[1] = bgElem[1]*(1-Cr_FG)+ecr*Cr_FG;
 //                bgElem[2] = bgElem[2]*(1-Cb_FG)+ecb*Cb_FG;
-                if (i == j)
-                    qDebug() << X << min << K_FG << CR_FG << CB_FG;
                 count++;
             }
             else
@@ -264,7 +262,14 @@ void ImagesProcessor::keyingDM(const Mat &fg, const Mat &bg, Mat &out)
     prepareSize(fg, bg, a, b);
     b.copyTo(out);
     DifferenceMatte matte(a.size());
-    matte.compute(a);
+    for (int i = 0; i < a.rows; i++)
+    {
+        for (int j = 0; j < a.cols; j++)
+        {
+//            a.at<Vec3b>(i,j)[2] -= 10;
+        }
+    }
+    matte.compute(a, kp->getColor());
     matte.scale(kp->getWhite(), kp->getBlack());
     if (kp->getMatteVisible())
     {

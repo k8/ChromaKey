@@ -29,6 +29,13 @@ const Mat& Movie::get(bool next)
     return image;
 }
 
+void Movie::setProgress(int p)
+{
+    int fpp = capture.get(CV_CAP_PROP_FRAME_COUNT)/100.0;
+    capture.set(CV_CAP_PROP_POS_FRAMES, fpp*p);
+    getFrame();
+}
+
 bool Movie::getFrame()
 {
     Mat frame;

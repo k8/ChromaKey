@@ -1,6 +1,7 @@
 #include "matte.h"
 #include <QDebug>
 #include <opencv/highgui.h>
+#include <QList>
 
 Matte::Matte(Size size)
 {
@@ -20,14 +21,16 @@ void Matte::invert()
 
 void Matte::multiply(const Mat &a, const Mat &b, Mat &out)
 {
-    for (int i = 0; i < mat.rows; i++)
+    int x = b.rows-a.rows;
+    int y = b.cols-a.cols;
+    for (int i = x; i < b.rows; i++)
     {
-        for (int j = 0; j < mat.cols; j++)
+        for (int j = y; j < b.cols; j++)
         {
-            double fac = mat.at<uchar>(i,j)/255.0;
-            out.at<Vec3b>(i,j)[0] = a.at<Vec3b>(i,j)[0]*fac+b.at<Vec3b>(i,j)[0]*(1-fac);
-            out.at<Vec3b>(i,j)[1] = a.at<Vec3b>(i,j)[1]*fac+b.at<Vec3b>(i,j)[1]*(1-fac);
-            out.at<Vec3b>(i,j)[2] = a.at<Vec3b>(i,j)[2]*fac+b.at<Vec3b>(i,j)[2]*(1-fac);
+            double fac = mat.at<uchar>(i-x,j-y)/255.0;
+            out.at<Vec3b>(i,j)[0] = a.at<Vec3b>(i-x,j-y)[0]*fac+b.at<Vec3b>(i,j)[0]*(1-fac);
+            out.at<Vec3b>(i,j)[1] = a.at<Vec3b>(i-x,j-y)[1]*fac+b.at<Vec3b>(i,j)[1]*(1-fac);
+            out.at<Vec3b>(i,j)[2] = a.at<Vec3b>(i-x,j-y)[2]*fac+b.at<Vec3b>(i,j)[2]*(1-fac);
         }
     }
 }
@@ -45,16 +48,32 @@ DifferenceMatte::DifferenceMatte(Size size)
 
 }
 
-void DifferenceMatte::compute(const Mat &a)
+void DifferenceMatte::compute(const Mat &img, QColor color)
 {
-    for (int i=0; i<a.rows; i++)
+    int a, b, c;
+    setIndexes(color, a, b, c);
+    for (int i=0; i<img.rows; i++)
     {
-        for (int j=0; j<a.cols; j++)
+        for (int j=0; j<img.cols; j++)
         {
-            Vec3b elem = a.at<Vec3b>(i,j);
-            int value = elem[1]-max(elem[2], elem[2]);
+            Vec3b elem = img.at<Vec3b>(i,j);
+            int value = elem[a]-max(elem[b], elem[c]);
             if (value < 0) value = 0;
             mat.at<uchar>(i, j) = value;
         }
     }
+}
+
+void DifferenceMatte::setIndexes(QColor color, int& a, int& b, int& c)
+{
+    QList<Color> list;
+    list.append(Color(color.red(), 2));
+    list.append(Color(color.green(), 1));
+    list.append(Color(color.blue(), 0));
+    qSort(list);
+    a = list.at(0).index;
+    b = list.at(1).index;
+    if (abs(list.at(0).value-list.at(1).value) < 50)
+        b = list.at(2).index;
+    c = list.at(2).index;
 }

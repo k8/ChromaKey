@@ -18,9 +18,8 @@ MainWidget::MainWidget(QWidget *parent) :
     QRgb color = qRgb(0, 0, 0);
     QSize movieSize(300, 200);    
 
-    ui->hsvButton->toggle();
     imagesSupplier = new ImagesSupplier(color, movieSize);
-    keyingParameters = new KeyingParameters(ui->hsvButton->isChecked() ? KeyingParameters::KA_HSV : KeyingParameters::KA_YCbCr,
+    keyingParameters = new KeyingParameters(algorithmName(ui->tabWidget->currentIndex()),
                                             color,
                                             ui->hueSlider->value(),
                                             ui->saturationSlider->value(),
@@ -29,7 +28,7 @@ MainWidget::MainWidget(QWidget *parent) :
                                             ui->blueSlider->value(),
                                             ui->redSlider->value(),
                                             ui->alphaSpinBox->value(),
-                                            ui->segmentationCheck->isChecked(),
+                                            false,
                                             ui->dmSlider->value(),
                                             ui->dmSlider2->value(),
                                             ui->showDmBox->isChecked());
@@ -97,6 +96,8 @@ void MainWidget::openFile(const QString &file, bool fg)
 
 void MainWidget::connectObjects()
 {
+    connect(ui->movieSlider, SIGNAL(sliderReleased()), this, SLOT(shiftMovie()));
+
     connect(keyingThread, SIGNAL(frameReady(const QImage&, const QImage&)), this, SLOT(prepareFrame(const QImage&, const QImage&)));
     connect(keyingThread, SIGNAL(noMoreFrames()), this, SLOT(movieFinished()));
     connect(keyingParameters, SIGNAL(parameterChanged()), keyingThread, SLOT(update()));
@@ -106,8 +107,6 @@ void MainWidget::connectObjects()
     connect(ui->hueSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setHue(int)));
     connect(ui->saturationSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setSaturation(int)));
     connect(ui->valueSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setValue(int)));
-
-    connect(ui->segmentationCheck, SIGNAL(toggled(bool)), keyingParameters, SLOT(setSegmentaion(bool)));
 
     connect(ui->luminanceSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setLuminance(int)));
     connect(ui->blueSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setBlue(int)));
@@ -187,6 +186,20 @@ void MainWidget::showOpenFailMessage(const QString &file)
     showFailMessage("Failed to open file "+file+".");
 }
 
+KeyingParameters::KeyingAlgorithm MainWidget::algorithmName(int index)
+{
+
+    switch (index)
+    {
+    case 0:
+        return KeyingParameters::KA_HSV;
+    case 1:
+        return KeyingParameters::KA_DM;
+    case 2:
+        return KeyingParameters::KA_YCbCr;
+    }
+}
+
 void MainWidget::showPlayPauseButton(bool show)
 {
     ui->playPauseButton->setVisible(show);
@@ -253,17 +266,13 @@ void MainWidget::on_saveButton_clicked()
     }
 }
 
-void MainWidget::on_hsvButton_clicked()
+void MainWidget::on_tabWidget_currentChanged(int index)
 {
-    keyingParameters->setKeyingAlgorithm(KeyingParameters::KA_HSV);
+    keyingParameters->setKeyingAlgorithm(algorithmName(index));
 }
 
-void MainWidget::on_ycbcrButton_clicked()
+void MainWidget::shiftMovie()
 {
-    keyingParameters->setKeyingAlgorithm(KeyingParameters::KA_YCbCr);
-}
-
-void MainWidget::on_dmButton_clicked()
-{
-    keyingParameters->setKeyingAlgorithm(KeyingParameters::KA_DM);
+    imagesSupplier->setProgress(ui->movieSlider->value());
+    keyingThread->update();
 }

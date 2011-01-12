@@ -14,9 +14,16 @@ public:
     enum KeyingAlgorithm
     {
         KA_HSV,
+        KA_DM,
         KA_YCbCr,
-        KA_DM
     };
+    enum ColorName
+    {
+        C_RED,
+        C_GREEN,
+        c_BLUE
+    };
+
     KeyingParameters(KeyingAlgorithm keyingAlgorithm,
                      QRgb color,
                      int hue,

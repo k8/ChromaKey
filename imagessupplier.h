@@ -15,6 +15,8 @@ using namespace cv;
 
 class ImagesSupplier : public QObject
 {
+    Q_OBJECT
+
 public:
     ImagesSupplier(QRgb color = 0, QSize size = QSize(0, 0));
     void init(const QString& fgFile, const QString& bgFile);
@@ -36,6 +38,7 @@ public:
     bool hasMoreImages();
     void saveFrame(const Mat& img);
     int getProgress();
+    void setProgress(int p);
 
 private:
     bool open(Image** img, const QString& file);

@@ -18,6 +18,7 @@ public:
     int getFPS() {return capture.get(CV_CAP_PROP_FPS);}
     int getFOURCC() {return capture.get(CV_CAP_PROP_FOURCC);}
     int getProgress() { return round(capture.get(CV_CAP_PROP_POS_AVI_RATIO)*100.0); }
+    void setProgress(int p);
 
 protected:
     bool getFrame();
