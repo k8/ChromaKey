@@ -1,5 +1,8 @@
 #include "keyingparameters.h"
 
+#include <QDebug>
+#include <QList>
+
 KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, int hue, int saturation, int value, int luminance, int blue, int red, int alpha, bool segmentation, int white, int black, bool matteVisible)
     :
     keyingAlgorithm(keyingAlgorithm),
@@ -29,6 +32,7 @@ void KeyingParameters::setColor(QRgb c)
 {
     QMutexLocker locker(&mutex);
     color = c;
+    setColors(c);
     emit parameterChanged();
 }
 
@@ -107,4 +111,34 @@ void KeyingParameters::setMatteVisible(bool v)
     QMutexLocker locker(&mutex);
     matteVisible = v;
     emit parameterChanged();
+}
+
+void KeyingParameters::setFirstColor(ColorName color)
+{
+    QMutexLocker locker(&mutex);
+    firstColor = color;
+    emit parameterChanged();
+}
+
+void KeyingParameters::setSecondColor(ColorName color)
+{
+    QMutexLocker locker(&mutex);
+    secondColor = color;
+    emit parameterChanged();
+}
+
+void KeyingParameters::setColors(QColor color)
+{
+    QList<Color> list;
+    list.append(Color(color.red(), C_RED));
+    list.append(Color(color.green(), C_GREEN));
+    list.append(Color(color.blue(), C_BLUE));
+    qSort(list);
+    firstColor = list.at(0).index;
+    secondColor = C_MAX;
+    qDebug() << color.red() << color.green() << color.blue();
+    qDebug() << list.at(0).value << list.at(1).value << list.at(2).value;
+    if (abs(list.at(0).value-list.at(1).value) < 20)
+        secondColor = list.at(2).index;
+    ;
 }

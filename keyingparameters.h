@@ -21,7 +21,8 @@ public:
     {
         C_RED,
         C_GREEN,
-        c_BLUE
+        C_BLUE,
+        C_MAX
     };
 
     KeyingParameters(KeyingAlgorithm keyingAlgorithm,
@@ -50,6 +51,8 @@ public:
     int getWhite() {QMutexLocker locker(&mutex); return white; }
     int getBlack() {QMutexLocker locker(&mutex); return black; }
     bool getMatteVisible() {QMutexLocker locker(&mutex); return matteVisible; }
+    ColorName getFirstColor() {QMutexLocker locker(&mutex); return firstColor; }
+    ColorName getSecondColor() {QMutexLocker locker(&mutex); return secondColor; }
 
 public slots:
     void setKeyingAlgorithm(KeyingAlgorithm ka);
@@ -65,11 +68,26 @@ public slots:
     void setWhite(int w);
     void setBlack(int b);
     void setMatteVisible(bool v);
+    void setFirstColor(ColorName color);
+    void setSecondColor(ColorName color);
+    void setColors(QColor color);
 
 signals:
     void parameterChanged();
 
 private:
+    class Color
+    {
+    public:
+        Color(int value, ColorName index): value(value), index(index) {}
+        int value;
+        ColorName index;
+    };
+    friend bool operator <(const Color& a, const Color& b)
+    {
+        return a.value > b.value;
+    }
+
     KeyingAlgorithm keyingAlgorithm;
     QRgb color;
     int hue;
@@ -83,7 +101,8 @@ private:
     int white;
     int black;
     bool matteVisible;
-
+    ColorName firstColor;
+    ColorName secondColor;
     QMutex mutex;
 };
 

@@ -6,7 +6,7 @@ ImageFactory::ImageFactory()
 
 Image* ImageFactory::createImage(const QString &file)
 {
-    if (file.contains(".avi"))
+    if (file.contains(".avi") or file.contains(".AVI"))
     {
         return new Movie(file);
     }

@@ -2,10 +2,9 @@
 #define MAINWIDGET_H
 
 #include <QWidget>
-#include "filesavingdialog.h"
+#include <QMap>
 #include "realtimethread.h"
 #include "imagessupplier.h"
-#include "imagesprocessor.h"
 #include "keyingparameters.h"
 
 namespace Ui {
@@ -29,24 +28,26 @@ protected:
     void play();
     void showFailMessage(const QString& text);
     void showOpenFailMessage(const QString& file);
+    void initColorNames();
 
     KeyingParameters::KeyingAlgorithm algorithmName(int index);
 
 protected slots:
     void prepareFrame(const QImage& big, const QImage& small);
     void changeColor(QRgb color);
-    void savingFinished();
 
 private:
     Ui::MainWidget *ui;
-    FileSavingDialog* savingDialog;
     ImagesSupplier* imagesSupplier;
-    ImagesProcessor* imagesProcessor;
     RealTimeThread* keyingThread;
     KeyingParameters* keyingParameters;
     QString filesPath;
+    QMap<int, KeyingParameters::ColorName> colorCodes;
+    QMap<KeyingParameters::ColorName, int> colorIndexes;
 
 private slots:
+    void on_secondColorBox_currentIndexChanged(int index);
+    void on_mainColorBox_currentIndexChanged(int index);
     void on_tabWidget_currentChanged(int index);
     void showPlayPauseButton(bool show);
     void movieFinished();
@@ -58,6 +59,8 @@ private slots:
     void on_saveButton_clicked();
 
     void shiftMovie();
+
+    void updateColorCodes();
 };
 
 #endif // MAINWIDGET_H

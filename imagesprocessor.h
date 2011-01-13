@@ -30,6 +30,7 @@ protected:
     void resize(const Mat& mat, Mat& out, double fact);
     void prepareSize(const Mat& a, const Mat& b, Mat& c, Mat& d);
     void segmentation(Mat& in);
+    void setIndexes(int& a, int& b, int& c);
 
 private:
     QMutex mutex;

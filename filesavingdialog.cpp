@@ -5,6 +5,8 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QCloseEvent>
+#include "imagessupplier.h"
+#include "keyingparameters.h"
 
 
 FileSavingDialog::FileSavingDialog(ImagesSupplier *is, KeyingParameters* kp, const QString& file, QWidget *parent)
@@ -12,11 +14,13 @@ FileSavingDialog::FileSavingDialog(ImagesSupplier *is, KeyingParameters* kp, con
     QDialog(parent),
     ui(new Ui::FileSavingDialog)
 {
+    this->setAttribute(Qt::WA_DeleteOnClose);
+
     ui->setupUi(this);
     QStringList list = file.split(QDir::separator());
     setWindowTitle("Saving "+list.last());
     fileName = list.last();
-    saveSupplier = new ImagesSupplier();
+    ImagesSupplier* saveSupplier = new ImagesSupplier();
     saveSupplier->init(is->getForegroundFile(), is->getBackgroundFile());
     saveThread = new SavingThread(saveSupplier, new ImagesProcessor(kp));
     saveThread->play();
@@ -32,8 +36,8 @@ FileSavingDialog::~FileSavingDialog()
     saveThread->stop();
     saveThread->wait();
     delete saveThread;
-    delete saveSupplier;
     delete ui;
+    qDebug() << "deleting FileSavingDialog";
 }
 
 void FileSavingDialog::changeEvent(QEvent *e)

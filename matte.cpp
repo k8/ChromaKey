@@ -48,10 +48,8 @@ DifferenceMatte::DifferenceMatte(Size size)
 
 }
 
-void DifferenceMatte::compute(const Mat &img, QColor color)
+void DifferenceMatte::compute(const Mat &img, int a, int b, int c)
 {
-    int a, b, c;
-    setIndexes(color, a, b, c);
     for (int i=0; i<img.rows; i++)
     {
         for (int j=0; j<img.cols; j++)
@@ -62,18 +60,4 @@ void DifferenceMatte::compute(const Mat &img, QColor color)
             mat.at<uchar>(i, j) = value;
         }
     }
-}
-
-void DifferenceMatte::setIndexes(QColor color, int& a, int& b, int& c)
-{
-    QList<Color> list;
-    list.append(Color(color.red(), 2));
-    list.append(Color(color.green(), 1));
-    list.append(Color(color.blue(), 0));
-    qSort(list);
-    a = list.at(0).index;
-    b = list.at(1).index;
-    if (abs(list.at(0).value-list.at(1).value) < 50)
-        b = list.at(2).index;
-    c = list.at(2).index;
 }

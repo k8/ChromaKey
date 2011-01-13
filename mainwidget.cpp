@@ -8,12 +8,15 @@
 #include <QColor>
 #include <QMessageBox>
 
+#include "imagesprocessor.h"
+#include "filesavingdialog.h"
+
+
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MainWidget),
-    savingDialog(0)
+    ui(new Ui::MainWidget)
 {
-    ui->setupUi(this);    
+    ui->setupUi(this);
     filesPath = QDir::currentPath()+QDir::separator()+"img";
     QRgb color = qRgb(0, 0, 0);
     QSize movieSize(300, 200);    
@@ -32,17 +35,18 @@ MainWidget::MainWidget(QWidget *parent) :
                                             ui->dmSlider->value(),
                                             ui->dmSlider2->value(),
                                             ui->showDmBox->isChecked());
-    imagesProcessor = new ImagesProcessor(keyingParameters, movieSize);
+    initColorNames();
+    ImagesProcessor* imagesProcessor = new ImagesProcessor(keyingParameters, movieSize);
     keyingThread = new RealTimeThread(imagesSupplier, imagesProcessor);
     ui->movieLabel->init(color, movieSize, imagesProcessor);
 
     connectObjects();
 
-
     setForegroundIcon(imagesSupplier->getForegroundIcon(ui->fgButton->size()));
     setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
     changeColor(color);
     showPlayPauseButton(false);
+
 
 //    <ycbcr testing settings>
 //    openFile("img/input.avi", true);
@@ -61,7 +65,6 @@ MainWidget::~MainWidget()
     keyingThread->stop();
     keyingThread->wait();
     delete keyingThread;
-    delete imagesSupplier;
     delete ui;
 }
 
@@ -117,6 +120,7 @@ void MainWidget::connectObjects()
     connect(ui->dmSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setWhite(int)));
     connect(ui->dmSlider2, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setBlack(int)));
     connect(ui->showDmBox, SIGNAL(toggled(bool)), keyingParameters, SLOT(setMatteVisible(bool)));
+
 }
 
 void MainWidget::setForegroundIcon(const QImage& img)
@@ -141,12 +145,7 @@ void MainWidget::changeColor(QRgb color)
     pix.fill(QColor(color));
     ui->colorButton->setIcon(pix);;
     keyingParameters->setColor(color);
-}
-
-void MainWidget::savingFinished()
-{
-    delete savingDialog;
-    savingDialog = 0;
+    updateColorCodes();
 }
 
 void MainWidget::changeEvent(QEvent *e)
@@ -184,6 +183,28 @@ void MainWidget::showFailMessage(const QString &text)
 void MainWidget::showOpenFailMessage(const QString &file)
 {
     showFailMessage("Failed to open file "+file+".");
+}
+
+void MainWidget::initColorNames()
+{
+    QStringList colorsList;
+    int i = 0;
+    colorsList.push_back("Red");
+    colorCodes[i] = KeyingParameters::C_RED;
+    colorIndexes[KeyingParameters::C_RED] = i++;
+    colorsList.push_back("Green");
+    colorCodes[i] = KeyingParameters::C_GREEN;
+    colorIndexes[KeyingParameters::C_GREEN] = i++;
+    colorsList.push_back("Blue");
+    colorCodes[i] = KeyingParameters::C_BLUE;
+    colorIndexes[KeyingParameters::C_BLUE] = i++;
+
+    ui->mainColorBox->addItems(colorsList);
+
+    colorsList.push_back("Maximum");
+    colorCodes[i] = KeyingParameters::C_MAX;
+    colorIndexes[KeyingParameters::C_MAX] = i++;
+    ui->secondColorBox->addItems(colorsList);
 }
 
 KeyingParameters::KeyingAlgorithm MainWidget::algorithmName(int index)
@@ -260,9 +281,8 @@ void MainWidget::on_saveButton_clicked()
     QString file = QFileDialog::getSaveFileName(this, "Save file", filesPath, filter);
     if (file != QString())
     {
-        savingDialog = new FileSavingDialog(imagesSupplier, keyingParameters, file, this);
+        FileSavingDialog* savingDialog = new FileSavingDialog(imagesSupplier, keyingParameters, file, this);
         savingDialog->show();
-        connect(savingDialog, SIGNAL(finished()), this, SLOT(savingFinished()));
     }
 }
 
@@ -275,4 +295,23 @@ void MainWidget::shiftMovie()
 {
     imagesSupplier->setProgress(ui->movieSlider->value());
     keyingThread->update();
+}
+
+void MainWidget::updateColorCodes()
+{
+    qDebug() << "first index: " << colorIndexes[keyingParameters->getFirstColor()];
+    qDebug() << "second index: " << colorIndexes[keyingParameters->getSecondColor()];
+
+    ui->mainColorBox->setCurrentIndex(colorIndexes[keyingParameters->getFirstColor()]);
+    ui->secondColorBox->setCurrentIndex(colorIndexes[keyingParameters->getSecondColor()]);
+}
+
+void MainWidget::on_mainColorBox_currentIndexChanged(int index)
+{
+    keyingParameters->setFirstColor(colorCodes[index]);
+}
+
+void MainWidget::on_secondColorBox_currentIndexChanged(int index)
+{
+    keyingParameters->setSecondColor(colorCodes[index]);
 }

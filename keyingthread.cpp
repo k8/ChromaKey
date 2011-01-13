@@ -11,6 +11,8 @@ KeyingThread::KeyingThread(ImagesSupplier *is, ImagesProcessor *ip)
 
 KeyingThread::~KeyingThread()
 {
+    delete imagesProcessor;
+    delete imagesSupplier;
 }
 
 void KeyingThread::keying(cv::Mat &out)

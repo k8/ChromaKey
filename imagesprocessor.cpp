@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QColor>
 #include <QMutexLocker>
+#include <QMap>
 #include <cmath>
 #include "matte.h"
 
@@ -98,6 +99,36 @@ void ImagesProcessor::segmentation(Mat &in)
       }
     }
     cvtColor(image, in, CV_HSV2BGR);
+}
+
+void ImagesProcessor::setIndexes(int& a, int& b, int& c)
+{
+    QMap<KeyingParameters::ColorName, int> indexes;
+    indexes[KeyingParameters::C_BLUE] = 0;
+    indexes[KeyingParameters::C_GREEN] = 1;
+    indexes[KeyingParameters::C_RED] = 2;
+
+    KeyingParameters::ColorName firstColor = kp->getFirstColor();
+    KeyingParameters::ColorName secondColor = kp->getSecondColor();
+
+    switch (firstColor)
+    {
+    case KeyingParameters::C_RED:
+        a = 2;
+        if (secondColor == KeyingParameters::C_MAX) { b = 0; c = 1; }
+        else {b = indexes[secondColor]; c = b; }
+        break;
+    case KeyingParameters::C_GREEN:
+        a = 1;
+        if (secondColor == KeyingParameters::C_MAX) { b = 2; c = 0; }
+        else {b = indexes[secondColor]; c = b; }
+        break;
+    case KeyingParameters::C_BLUE:
+        a = 0;
+        if (secondColor == KeyingParameters::C_MAX) { b = 1; c = 2; }
+        else {b = indexes[secondColor]; c = b; }
+        break;
+    }
 }
 
 void ImagesProcessor::keying(const Mat &fg, const Mat &bg, Mat &out)
@@ -269,7 +300,9 @@ void ImagesProcessor::keyingDM(const Mat &fg, const Mat &bg, Mat &out)
 //            a.at<Vec3b>(i,j)[2] -= 10;
         }
     }
-    matte.compute(a, kp->getColor());
+    int f, s, t;
+    setIndexes(f, s, t);
+    matte.compute(a, f, s, t);
     matte.scale(kp->getWhite(), kp->getBlack());
     if (kp->getMatteVisible())
     {

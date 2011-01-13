@@ -22,22 +22,7 @@ class DifferenceMatte : public Matte
 {        
 public:
     DifferenceMatte(Size size);
-    void compute(const Mat& in, QColor color);
-
-private:    
-    class Color
-    {
-    public:
-        Color(int value, int index): value(value), index(index) {}
-        int value;
-        int index;
-    };
-    friend bool operator <(const Color& a, const Color& b)
-    {
-        return a.value > b.value;
-    }
-
-    void setIndexes(QColor color, int& a, int& b, int& c);
+    void compute(const Mat& in, int a, int b, int c);
 };
 
 #endif // MATTE_H

@@ -2,9 +2,10 @@
 #define FILESAVINGDIALOG_H
 
 #include <QDialog>
-#include "imagessupplier.h"
-#include "keyingparameters.h"
 #include "savingthread.h"
+
+class ImagesSupplier;
+class KeyingParameters;
 
 namespace Ui {
     class FileSavingDialog;
@@ -28,7 +29,6 @@ protected slots:
 
 private:
     Ui::FileSavingDialog *ui;
-    ImagesSupplier* saveSupplier;
     SavingThread* saveThread;
     QString fileName;
 };
