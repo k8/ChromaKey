@@ -22,7 +22,8 @@ SOURCES += main.cpp \
     hsvkeyer.cpp \
     anglekeyer.cpp \
     differencekeyer.cpp \
-    keyerfactory.cpp
+    keyerfactory.cpp \
+    movieslider.cpp
 HEADERS += mainwidget.h \
     keyingthread.h \
     imagesprocessor.h \
@@ -41,7 +42,8 @@ HEADERS += mainwidget.h \
     hsvkeyer.h \
     anglekeyer.h \
     differencekeyer.h \
-    keyerfactory.h
+    keyerfactory.h \
+    movieslider.h
 FORMS += mainwidget.ui \
     filesavingdialog.ui
 CONFIG += link_pkgconfig

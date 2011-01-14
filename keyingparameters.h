@@ -30,11 +30,7 @@ public:
                      int hue,
                      int saturation,
                      int value,
-                     int luminance,
-                     int blue,
-                     int red,
                      int alpha,
-                     bool segmentation,
                      int white,
                      int black,
                      bool matteVisible);
@@ -43,11 +39,7 @@ public:
     int getHue() {QMutexLocker locker(&mutex); return hue; }
     int getSaturation() {QMutexLocker locker(&mutex); return saturation; }
     int getValue() {QMutexLocker locker(&mutex); return value; }
-    int getLuminance() {QMutexLocker locker(&mutex); return luminance; }
-    int getBlue() {QMutexLocker locker(&mutex); return blue; }
-    int getRed() {QMutexLocker locker(&mutex); return red; }
     int getAlpha() {QMutexLocker locker(&mutex); return alpha;}
-    bool getSegmentation() {QMutexLocker locker(&mutex); return segmentation; }
     int getWhite() {QMutexLocker locker(&mutex); return white; }
     int getBlack() {QMutexLocker locker(&mutex); return black; }
     bool isMatteVisible() {QMutexLocker locker(&mutex); return matteVisible; }
@@ -60,11 +52,7 @@ public slots:
     void setHue(int h);
     void setSaturation(int s);
     void setValue(int v);
-    void setLuminance(int l);
-    void setBlue(int b);
-    void setRed(int r);
     void setAlpha(int a);
-    void setSegmentaion(bool s);
     void setWhite(int w);
     void setBlack(int b);
     void setMatteVisible(bool v);
@@ -93,11 +81,7 @@ private:
     int hue;
     int saturation;
     int value;
-    int luminance;
-    int blue;
-    int red;
     int alpha;
-    bool segmentation;
     int white;
     int black;
     bool matteVisible;

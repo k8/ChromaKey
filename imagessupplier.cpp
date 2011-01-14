@@ -155,7 +155,7 @@ int ImagesSupplier::getProgress()
     QMutexLocker locker(&mutex);
     if (fgPic->isMovie())
     {
-        p = (static_cast<Movie*>(fgPic))->getProgress();
+        p = (static_cast<Movie*>(fgPic))->getProgress()+1;
     }
     return p;
 }

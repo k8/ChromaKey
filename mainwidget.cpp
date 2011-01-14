@@ -27,11 +27,7 @@ MainWidget::MainWidget(QWidget *parent) :
                                             ui->hueSlider->value(),
                                             ui->saturationSlider->value(),
                                             ui->valueSlider->value(),
-                                            ui->luminanceSlider->value(),
-                                            ui->blueSlider->value(),
-                                            ui->redSlider->value(),
-                                            ui->alphaSpinBox->value(),
-                                            false,
+                                            ui->alphaSlider->value(),
                                             ui->dmSlider->value(),
                                             ui->dmSlider2->value(),
                                             ui->showDmBox->isChecked());
@@ -92,7 +88,7 @@ void MainWidget::connectObjects()
     connect(ui->movieSlider, SIGNAL(sliderReleased()), this, SLOT(shiftMovie()));
 
     connect(keyingThread, SIGNAL(frameReady(const QImage&, const QImage&)), this, SLOT(prepareFrame(const QImage&, const QImage&)));
-    connect(keyingThread, SIGNAL(noMoreFrames()), this, SLOT(movieFinished()));
+//    connect(keyingThread, SIGNAL(noMoreFrames()), this, SLOT(movieFinished()));
     connect(keyingThread, SIGNAL(progressChanged(int)), ui->movieSlider, SLOT(setValue(int)));
     connect(keyingParameters, SIGNAL(parameterChanged()), keyingThread, SLOT(update()));
 
@@ -102,11 +98,7 @@ void MainWidget::connectObjects()
     connect(ui->saturationSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setSaturation(int)));
     connect(ui->valueSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setValue(int)));
 
-    connect(ui->luminanceSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setLuminance(int)));
-    connect(ui->blueSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setBlue(int)));
-    connect(ui->redSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setRed(int)));
-
-    connect(ui->alphaSpinBox, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setAlpha(int)));
+    connect(ui->alphaSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setAlpha(int)));
 
     connect(ui->dmSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setWhite(int)));
     connect(ui->dmSlider2, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setBlack(int)));

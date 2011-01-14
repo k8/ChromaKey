@@ -14,7 +14,6 @@ double abs(double x)
     return x;
 }
 
-
 void AngleKeyer::computeMatte()
 {
     double alpha = (kp->getAlpha()/180.0)*M_PI;
