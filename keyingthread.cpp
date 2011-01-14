@@ -2,20 +2,24 @@
 #include <QMutexLocker>
 #include <QDebug>
 
-KeyingThread::KeyingThread(ImagesSupplier *is, ImagesProcessor *ip)
+#include "keyerfactory.h"
+
+KeyingThread::KeyingThread(ImagesSupplier *is, KeyingParameters *kp)
     :
     imagesSupplier(is),
-    imagesProcessor(ip)
+    keyingParameters(kp)
 {
 }
 
 KeyingThread::~KeyingThread()
 {
-    delete imagesProcessor;
     delete imagesSupplier;
+    delete keyingParameters;
 }
 
 void KeyingThread::keying(cv::Mat &out)
 {
-    imagesProcessor->keying(imagesSupplier->getFgImage(isPaused()), imagesSupplier->getBgImage(isPaused()), out);
+    Keyer* keyer = KeyerFactory::createKeyer(keyingParameters->getKeyingAlgorithm());
+    keyer->keying(keyingParameters, imagesSupplier->getFgImage(isPaused()), imagesSupplier->getBgImage(isPaused()), out);
+    delete keyer;
 }

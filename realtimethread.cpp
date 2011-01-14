@@ -1,8 +1,13 @@
 #include "realtimethread.h"
 
-RealTimeThread::RealTimeThread(ImagesSupplier *is, ImagesProcessor *ip)
-    : KeyingThread(is, ip)
+RealTimeThread::RealTimeThread(ImagesSupplier *is, ImagesProcessor *ip, KeyingParameters *kp)
+    : KeyingThread(is, kp), imagesProcessor(ip)
 {
+}
+
+RealTimeThread::~RealTimeThread()
+{
+    delete imagesProcessor;
 }
 
 void RealTimeThread::waitForFrame()

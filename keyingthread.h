@@ -2,7 +2,7 @@
 #define KEYINGTHREAD_H
 
 #include "pausablethread.h"
-#include "imagesprocessor.h"
+#include "keyingparameters.h"
 #include "imagessupplier.h"
 #include "opencv/cv.h"
 
@@ -10,8 +10,8 @@ class KeyingThread : public PausableThread
 {
     Q_OBJECT
 public:
-    KeyingThread(ImagesSupplier* is, ImagesProcessor* ip);
-    ~KeyingThread();
+    KeyingThread(ImagesSupplier* is, KeyingParameters* kp);
+    virtual ~KeyingThread();
     void keying(cv::Mat& out);
 
 signals:
@@ -22,7 +22,7 @@ protected:
 
 protected:
     ImagesSupplier* imagesSupplier;
-    ImagesProcessor* imagesProcessor;
+    KeyingParameters* keyingParameters;
 };
 
 #endif // KEYINGTHREAD_H

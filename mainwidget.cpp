@@ -36,8 +36,8 @@ MainWidget::MainWidget(QWidget *parent) :
                                             ui->dmSlider2->value(),
                                             ui->showDmBox->isChecked());
     initColorNames();
-    ImagesProcessor* imagesProcessor = new ImagesProcessor(keyingParameters, movieSize);
-    keyingThread = new RealTimeThread(imagesSupplier, imagesProcessor);
+    ImagesProcessor* imagesProcessor = new ImagesProcessor(movieSize);
+    keyingThread = new RealTimeThread(imagesSupplier, imagesProcessor, keyingParameters);
     ui->movieLabel->init(color, movieSize, imagesProcessor);
 
     connectObjects();
@@ -46,16 +46,6 @@ MainWidget::MainWidget(QWidget *parent) :
     setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
     changeColor(color);
     showPlayPauseButton(false);
-
-
-//    <ycbcr testing settings>
-//    openFile("img/input.avi", true);
-//    openFile("img/new_york.avi", false);
-//    ui->ycbcrButton->click();
-//    changeColor(qRgb(45, 188, 179));
-//    ui->alphaSpinBox->setValue(295);
-//    connect(keyingThread, SIGNAL(started()), keyingThread, SLOT(update()));
-//    </ycbcr testing settings>
 
     keyingThread->start();
 }

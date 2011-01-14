@@ -8,7 +8,7 @@ class SavingThread : public KeyingThread
     Q_OBJECT
 
 public:
-    SavingThread(ImagesSupplier* is, ImagesProcessor* ip);
+    SavingThread(ImagesSupplier* is, KeyingParameters* kp);
 
 protected:
     bool nextIteration();

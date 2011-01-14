@@ -2,6 +2,7 @@
 #define REALTIMETHREAD_H
 
 #include "keyingthread.h"
+#include "imagesprocessor.h"
 #include <QTime>
 
 class RealTimeThread : public KeyingThread
@@ -9,7 +10,8 @@ class RealTimeThread : public KeyingThread
     Q_OBJECT
 
 public:
-    RealTimeThread(ImagesSupplier* is, ImagesProcessor* ip);
+    RealTimeThread(ImagesSupplier* is, ImagesProcessor* ip, KeyingParameters* kp);
+    ~RealTimeThread();
 
 signals:
     void frameReady(const QImage&, const QImage&);
@@ -21,7 +23,7 @@ protected:
 
 private:
     QTime time;
-
+    ImagesProcessor* imagesProcessor;
 };
 
 #endif // REALTIMETHREAD_H

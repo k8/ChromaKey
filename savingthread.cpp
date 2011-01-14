@@ -1,7 +1,7 @@
 #include "savingthread.h"
 
-SavingThread::SavingThread(ImagesSupplier *is, ImagesProcessor *ip)
-    : KeyingThread(is, ip)
+SavingThread::SavingThread(ImagesSupplier *is, KeyingParameters *kp)
+    : KeyingThread(is, kp)
 {
 }
 

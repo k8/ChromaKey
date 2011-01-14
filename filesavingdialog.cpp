@@ -22,7 +22,7 @@ FileSavingDialog::FileSavingDialog(ImagesSupplier *is, KeyingParameters* kp, con
     fileName = list.last();
     ImagesSupplier* saveSupplier = new ImagesSupplier();
     saveSupplier->init(is->getForegroundFile(), is->getBackgroundFile());
-    saveThread = new SavingThread(saveSupplier, new ImagesProcessor(kp));
+    saveThread = new SavingThread(saveSupplier, kp);
     saveThread->play();
     connect(saveThread, SIGNAL(finished()), this, SLOT(savingFinished()));
     ui->label->setText("Saving "+file);
