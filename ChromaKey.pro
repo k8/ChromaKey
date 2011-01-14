@@ -17,7 +17,12 @@ SOURCES += main.cpp \
     image.cpp \
     movie.cpp \
     imagefactory.cpp \
-    matte.cpp
+    matte.cpp \
+    keyer.cpp \
+    hsvkeyer.cpp \
+    anglekeyer.cpp \
+    differencekeyer.cpp \
+    keyerfactory.cpp
 HEADERS += mainwidget.h \
     keyingthread.h \
     imagesprocessor.h \
@@ -31,7 +36,12 @@ HEADERS += mainwidget.h \
     image.h \
     movie.h \
     imagefactory.h \
-    matte.h
+    matte.h \
+    keyer.h \
+    hsvkeyer.h \
+    anglekeyer.h \
+    differencekeyer.h \
+    keyerfactory.h
 FORMS += mainwidget.ui \
     filesavingdialog.ui
 CONFIG += link_pkgconfig

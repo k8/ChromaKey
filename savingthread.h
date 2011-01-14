@@ -10,9 +10,6 @@ class SavingThread : public KeyingThread
 public:
     SavingThread(ImagesSupplier* is, ImagesProcessor* ip);
 
-signals:
-    void progressChanged(int percent);
-
 protected:
     bool nextIteration();
 };

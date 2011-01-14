@@ -50,7 +50,7 @@ public:
     bool getSegmentation() {QMutexLocker locker(&mutex); return segmentation; }
     int getWhite() {QMutexLocker locker(&mutex); return white; }
     int getBlack() {QMutexLocker locker(&mutex); return black; }
-    bool getMatteVisible() {QMutexLocker locker(&mutex); return matteVisible; }
+    bool isMatteVisible() {QMutexLocker locker(&mutex); return matteVisible; }
     ColorName getFirstColor() {QMutexLocker locker(&mutex); return firstColor; }
     ColorName getSecondColor() {QMutexLocker locker(&mutex); return secondColor; }
 

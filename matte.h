@@ -13,6 +13,8 @@ public:
     void multiply(const Mat& a, const Mat& b, Mat& out);
     void scale(int white, int black);
     const Mat& getMat() {return mat;}
+    uchar value(int i, int j) {return mat.at<uchar>(i,j);} // i == row number, j == col number
+    void setValue(int i, int j, uchar value) {mat.at<uchar>(i,j) = value;} // i == row number, j == col number
 
 protected:
     Mat mat;

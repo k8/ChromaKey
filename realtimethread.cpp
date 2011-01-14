@@ -30,6 +30,7 @@ bool RealTimeThread::nextIteration()
     cv::Mat outFrame;
     keying(outFrame);
     emit frameReady(imagesProcessor->fromCvMat(outFrame), imagesProcessor->scaledFromCvMat(outFrame));
+    emit progressChanged(imagesSupplier->getProgress());
     if (! imagesSupplier->hasMoreImages())
     {
         emit noMoreFrames();

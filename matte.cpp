@@ -21,6 +21,7 @@ void Matte::invert()
 
 void Matte::multiply(const Mat &a, const Mat &b, Mat &out)
 {
+    out = b;
     int x = b.rows-a.rows;
     int y = b.cols-a.cols;
     for (int i = x; i < b.rows; i++)

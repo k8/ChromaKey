@@ -103,6 +103,7 @@ void MainWidget::connectObjects()
 
     connect(keyingThread, SIGNAL(frameReady(const QImage&, const QImage&)), this, SLOT(prepareFrame(const QImage&, const QImage&)));
     connect(keyingThread, SIGNAL(noMoreFrames()), this, SLOT(movieFinished()));
+    connect(keyingThread, SIGNAL(progressChanged(int)), ui->movieSlider, SLOT(setValue(int)));
     connect(keyingParameters, SIGNAL(parameterChanged()), keyingThread, SLOT(update()));
 
     connect(ui->movieLabel, SIGNAL(colorChanged(QRgb)), this, SLOT(changeColor(QRgb)));

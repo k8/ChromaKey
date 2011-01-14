@@ -151,8 +151,13 @@ void ImagesSupplier::saveFrame(const Mat &img)
 
 int ImagesSupplier::getProgress()
 {
+    int p = 0;
     QMutexLocker locker(&mutex);
-    return saver->getProgress();
+    if (fgPic->isMovie())
+    {
+        p = (static_cast<Movie*>(fgPic))->getProgress();
+    }
+    return p;
 }
 
 void ImagesSupplier::setProgress(int p)

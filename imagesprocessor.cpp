@@ -4,7 +4,9 @@
 #include <QMutexLocker>
 #include <QMap>
 #include <cmath>
+
 #include "matte.h"
+#include "keyerfactory.h"
 
 ImagesProcessor::ImagesProcessor(KeyingParameters *keyingParams, QSize size)
     : kp(keyingParams), imageSize(size)
@@ -132,19 +134,11 @@ void ImagesProcessor::setIndexes(int& a, int& b, int& c)
 }
 
 void ImagesProcessor::keying(const Mat &fg, const Mat &bg, Mat &out)
-{
-    switch (kp->getKeyingAlgorithm())
-    {
-    case KeyingParameters::KA_HSV:
-        keyingHSV(fg, bg, out);
-        break;
-    case KeyingParameters::KA_YCbCr:
-        keyingYCbCr(fg, bg, out);
-        break;
-    case KeyingParameters::KA_DM:
-        keyingDM(fg, bg, out);
-        break;
-    }
+{    
+//    keyingYCbCr(fg, bg, out);
+    Keyer* keyer = KeyerFactory::createKeyer(kp->getKeyingAlgorithm());
+    keyer->keying(kp, fg, bg, out);
+    delete keyer;
 }
 
 void ImagesProcessor::keyingHSV(const Mat &fg, const Mat &bg, Mat &out)
@@ -200,12 +194,12 @@ double keyValue(int in, int fix, int tol)
     return k;
 }
 
-double abs(double x)
-{
-    if (x < 0)
-        x = -x;
-    return x;
-}
+//double abs(double x)
+//{
+//    if (x < 0)
+//        x = -x;
+//    return x;
+//}
 
 void ImagesProcessor::keyingYCbCr(const Mat &fg, const Mat &bg, Mat &out)
 {
@@ -304,7 +298,7 @@ void ImagesProcessor::keyingDM(const Mat &fg, const Mat &bg, Mat &out)
     setIndexes(f, s, t);
     matte.compute(a, f, s, t);
     matte.scale(kp->getWhite(), kp->getBlack());
-    if (kp->getMatteVisible())
+    if (kp->isMatteVisible())
     {
         out = matte.getMat();
     }

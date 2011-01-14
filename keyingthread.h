@@ -14,6 +14,9 @@ public:
     ~KeyingThread();
     void keying(cv::Mat& out);
 
+signals:
+    void progressChanged(int percent);
+
 protected:
     virtual bool nextIteration() = 0;
 

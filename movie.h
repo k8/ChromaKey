@@ -33,7 +33,7 @@ class MovieSaver : public ImageSaver
 public:
     MovieSaver(const QString& file, Movie* movie, Size size);
     bool save(const Mat &image);
-    int getProgress() { return movie->getProgress(); }
+//    int getProgress() { return movie->getProgress(); }
 
 protected:
     bool openVideoWriter(const QString& file);
