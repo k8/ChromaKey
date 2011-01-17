@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QList>
 
-KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, int hue, int saturation, int value, int alpha, int white, int black, bool matteVisible)
+KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, int hue, int saturation, int value, int alpha, int white, int black, int ys, bool matteVisible)
     :
     keyingAlgorithm(keyingAlgorithm),
     color(color),
@@ -13,6 +13,7 @@ KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, 
     alpha(alpha),
     white(white),
     black(black),
+    ys(ys),
     matteVisible(matteVisible)
 {
 }
@@ -71,6 +72,13 @@ void KeyingParameters::setBlack(int b)
 {
     QMutexLocker locker(&mutex);
     black = b;
+    emit parameterChanged();
+}
+
+void KeyingParameters::setYs(int ys)
+{
+    QMutexLocker locker(&mutex);
+    this->ys = ys;
     emit parameterChanged();
 }
 

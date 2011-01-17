@@ -9,7 +9,7 @@ class ImageFactory
 public:
     ImageFactory();
     static Image* createImage(const QString& file);
-    static ImageSaver* createSaver(const QString& file, Image* fg, Image* bg, const Mat& img);
+    static ImageSaver* createSaver(const QString& file, Image* fg, Image* bg);
 };
 
 #endif // IMAGEFACTORY_H

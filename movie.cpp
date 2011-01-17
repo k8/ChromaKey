@@ -65,9 +65,11 @@ MovieSaver::MovieSaver(const QString &file, Movie *movie, Size size)
 
 bool MovieSaver::save(const Mat &image)
 {
+    Mat frame = image;
+    ImagesProcessor::to3Chanels(image, frame);
     if (videoWriter.isOpened())
     {
-        videoWriter << image;
+        videoWriter << frame;
         return true;
     }
     return false;

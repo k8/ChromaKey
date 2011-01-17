@@ -45,13 +45,13 @@ void Keyer::prepareSize(const Mat &a, const Mat &b)
 
 void Keyer::prepareOutput(Mat &out)
 {
+    matte->invert();
     if (kp->isMatteVisible())
     {
         out = matte->getMat();
     }
     else
     {
-        matte->invert();
         matte->multiply(fg, bg, out);
     }
 }

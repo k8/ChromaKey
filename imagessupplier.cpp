@@ -84,7 +84,7 @@ bool ImagesSupplier::save(const QString &file)
     {
         delete saver;
     }
-    saver = ImageFactory::createSaver(file, fgPic, bgPic, fgPic->get(false));
+    saver = ImageFactory::createSaver(file, fgPic, bgPic);
     outFile = file;
     return true;
 }

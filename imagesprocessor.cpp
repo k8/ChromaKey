@@ -64,6 +64,24 @@ void ImagesProcessor::resize(const Mat &mat, Mat &out, double fact)
     cv::resize(mat, out, Size(width, height));
 }
 
+void ImagesProcessor::to3Chanels(const Mat &mat, Mat &out)
+{
+    if (mat.type() != 0)
+        return;
+    out.create(mat.size(), CV_8UC3);
+    for (int i=0; i<out.rows; i++)
+    {
+      for (int j=0; j<out.cols; j++)
+      {
+          Vec3b& elem = out.at<Vec3b>(i,j);
+          int v = mat.at<uchar>(i,j);
+          elem[0] = v;
+          elem[1] = v;
+          elem[2] = v;
+      }
+  }
+}
+
 void ImagesProcessor::setSize(QSize size)
 {
     QMutexLocker locker(&mutex);

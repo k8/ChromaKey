@@ -16,15 +16,26 @@ Image* ImageFactory::createImage(const QString &file)
     }
 }
 
-ImageSaver* ImageFactory::createSaver(const QString &file, Image *fg, Image *bg, const Mat &img)
+ImageSaver* ImageFactory::createSaver(const QString &file, Image *fg, Image *bg)
 {
-    if (fg->isMovie())
+    if (file.contains(".avi") or file.contains(".AVI"))
     {
-        return new MovieSaver(file, static_cast<Movie*>(fg), img.size());
+        if (fg->isMovie())
+        {
+            Size size = fg->getSize();
+            if (bg->isMovie())
+            {
+                size = bg->getSize();
+            }
+            return new MovieSaver(file, static_cast<Movie*>(fg), size);
+        }
+        else
+        {
+            return new MovieSaver(file, static_cast<Movie*>(bg), bg->getSize());
+        }
     }
-    if (bg->isMovie())
+    else
     {
-        return new MovieSaver(file, static_cast<Movie*>(bg), img.size());
+        return new ImageSaver(file);
     }
-    return new ImageSaver(file);
 }

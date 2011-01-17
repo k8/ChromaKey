@@ -49,8 +49,7 @@ private slots:
     void on_secondColorBox_currentIndexChanged(int index);
     void on_mainColorBox_currentIndexChanged(int index);
     void on_tabWidget_currentChanged(int index);
-    void showPlayPauseButton(bool show);
-    void movieFinished();
+    void showMovieMenu(bool show);
 
     void on_colorButton_clicked();
     void on_bgButton_clicked();

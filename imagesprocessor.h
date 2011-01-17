@@ -17,8 +17,9 @@ public:
     ImagesProcessor(QSize size = QSize(100, 100));
     static QImage fromCvMat(const Mat& mat);
     QImage scaledFromCvMat(const Mat& mat);
-    static void fill(Mat& mat, QRgb color);
+    static void fill(Mat& mat, QRgb color);    
     static void resize(const Mat &mat, Mat &out, double fact);
+    static void to3Chanels(const Mat &mat, Mat &out);
     void setSize(QSize size);
     QSize getSize();
 

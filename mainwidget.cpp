@@ -30,6 +30,7 @@ MainWidget::MainWidget(QWidget *parent) :
                                             ui->alphaSlider->value(),
                                             ui->dmSlider->value(),
                                             ui->dmSlider2->value(),
+                                            ui->ysSlider->value(),
                                             ui->showDmBox->isChecked());
     initColorNames();
     ImagesProcessor* imagesProcessor = new ImagesProcessor(movieSize);
@@ -41,7 +42,7 @@ MainWidget::MainWidget(QWidget *parent) :
     setForegroundIcon(imagesSupplier->getForegroundIcon(ui->fgButton->size()));
     setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
     changeColor(color);
-    showPlayPauseButton(false);
+    showMovieMenu(false);
 
     keyingThread->start();
 }
@@ -88,7 +89,6 @@ void MainWidget::connectObjects()
     connect(ui->movieSlider, SIGNAL(sliderReleased()), this, SLOT(shiftMovie()));
 
     connect(keyingThread, SIGNAL(frameReady(const QImage&, const QImage&)), this, SLOT(prepareFrame(const QImage&, const QImage&)));
-//    connect(keyingThread, SIGNAL(noMoreFrames()), this, SLOT(movieFinished()));
     connect(keyingThread, SIGNAL(progressChanged(int)), ui->movieSlider, SLOT(setValue(int)));
     connect(keyingParameters, SIGNAL(parameterChanged()), keyingThread, SLOT(update()));
 
@@ -102,6 +102,9 @@ void MainWidget::connectObjects()
 
     connect(ui->dmSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setWhite(int)));
     connect(ui->dmSlider2, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setBlack(int)));
+
+    connect(ui->ysSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setYs(int)));
+
     connect(ui->showDmBox, SIGNAL(toggled(bool)), keyingParameters, SLOT(setMatteVisible(bool)));
 
 }
@@ -118,7 +121,7 @@ void MainWidget::setBackgroundIcon(const QImage& img)
 
 void MainWidget::updateMovieLabel()
 {
-    showPlayPauseButton(imagesSupplier->isMovie());
+    showMovieMenu(imagesSupplier->isMovie());
     keyingThread->update();
 }
 
@@ -204,20 +207,16 @@ KeyingParameters::KeyingAlgorithm MainWidget::algorithmName(int index)
     }
 }
 
-void MainWidget::showPlayPauseButton(bool show)
+void MainWidget::showMovieMenu(bool show)
 {
+    ui->movieMenuFrame->setVisible(show);
     ui->playPauseButton->setVisible(show);
+    ui->movieSlider->setVisible(show);
 }
 
 void MainWidget::prepareFrame(const QImage &big, const QImage &small)
 {
     ui->movieLabel->setPixmaps(QPixmap::fromImage(big), QPixmap::fromImage(small));
-}
-
-void MainWidget::movieFinished()
-{
-    showPlayPauseButton(false);
-    pause();
 }
 
 void MainWidget::on_playPauseButton_clicked()
@@ -258,9 +257,11 @@ void MainWidget::on_colorButton_clicked()
 
 void MainWidget::on_saveButton_clicked()
 {
-    QString filter = "Images (*.jpg)";
-    if (imagesSupplier->isMovie())
-        filter = "Movies (*.avi)";
+    QString filter = "Movies (*.avi);;Images (*.jpg)";
+    if (! imagesSupplier->isMovie())
+    {
+        filter = "Images (*.jpg)";
+    }
     QString file = QFileDialog::getSaveFileName(this, "Save file", filesPath, filter);
     if (file != QString())
     {

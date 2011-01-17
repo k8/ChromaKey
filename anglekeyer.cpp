@@ -40,7 +40,8 @@ void AngleKeyer::computeMatte()
 
     double min =  0;
 
-    int count = 0;
+    qDebug() << kp->getYs();
+
     for (int i=0; i<fg.rows; i++)
     {
         for (int j=0; j<fg.cols; j++)
@@ -53,6 +54,7 @@ void AngleKeyer::computeMatte()
 
             double ecb_norm = YCbCrCordinate::normalized(ecb);
             double ecr_norm = YCbCrCordinate::normalized(ecr);
+            double ey_norm = YCbCrCordinate::normalized(ey);
 
             double X = ecb_norm*cos_tau+ecr_norm*sin_tau;
             double Z = ecr_norm*cos_tau-ecb_norm*sin_tau;
@@ -63,24 +65,31 @@ void AngleKeyer::computeMatte()
             {
                 K_FG = X-min;
             }
+            double Y_FG = 0;
+            double ys = kp->getYs()/10.0;
+            if (ys*K_FG <= ey_norm)
+                Y_FG = ey_norm-ys*K_FG;
             double CB_FG = ecb-K_FG*cos_tau;
             double CR_FG = ecr-K_FG*sin_tau;
 
-            if (K_FG > 0)
-            {
-                bgElem = elem;
-                bgElem[0] = bgElem[0]*(1-K_FG)+ey*K_FG;
-                bgElem[1] = CR_FG;
-                bgElem[2] = CB_FG;
-                double Y_norm = YCbCrCordinate::normalized(ey);
-//                bgElem[0] = Y_norm-kp->getLuminance()*K_FG;
-//                bgElem[1] = bgElem[1]*(1-Cr_FG)+ecr*Cr_FG;
-//                bgElem[2] = bgElem[2]*(1-Cb_FG)+ecb*Cb_FG;
-                count++;
-            }
-            else
-            {
-            }
+            if (K_FG < 0) K_FG = 0;
+            //bgElem = elem;
+            bgElem[0] = bgElem[0]*(1-K_FG)+ey*K_FG;
+            bgElem[1] = bgElem[1]*(1-K_FG)+ecr*K_FG;
+            bgElem[2] = bgElem[2]*(1-K_FG)+ecb*K_FG;
+
+            matte->setValue(i, j, K_FG*255);
+//            bgElem[0] = Y_FG*255;
+//            bgElem[1] = CR_FG;
+//            bgElem[2] = CB_FG;
+//
+//            if (K_FG > 0)
+//            {
+//                bgElem = elem;
+//                bgElem[0] = bgElem[0]*(1-Y_FG)+ey*Y_FG;
+//                bgElem[1] = bgElem[1]*(1-CR_FG)+ecr*CR_FG;
+//                bgElem[2] = bgElem[2]*(1-CB_FG)+ecb*CB_FG;
+//            }
         }
     }
     cvtColor(bgYCrCb, roi, CV_YCrCb2BGR);
