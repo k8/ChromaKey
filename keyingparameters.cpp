@@ -18,6 +18,36 @@ KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, 
 {
 }
 
+KeyingParameters::KeyingParameters(KeyingParameters &other)
+{
+    keyingAlgorithm = other.getKeyingAlgorithm();
+    color = other.getColor().rgb();
+    hue = other.getHue();
+    saturation = other.getSaturation();
+    value = other.getValue();
+    alpha = other.getAlpha();
+    white = other.getWhite();
+    black = other.getBlack();
+    ys = other.getYs();
+    matteVisible = other.isMatteVisible();
+}
+
+KeyingParameters::KeyingParameters(KeyingParameters* other)
+{
+    keyingAlgorithm = other->getKeyingAlgorithm();
+    color = other->getColor().rgb();
+    hue = other->getHue();
+    saturation = other->getSaturation();
+    value = other->getValue();
+    alpha = other->getAlpha();
+    white = other->getWhite();
+    black = other->getBlack();
+    ys = other->getYs();
+    matteVisible = other->isMatteVisible();
+    firstColor = other->getFirstColor();
+    secondColor = other->getSecondColor();
+}
+
 void KeyingParameters::setKeyingAlgorithm(KeyingAlgorithm ka)
 {
     QMutexLocker locker(&mutex);

@@ -1,7 +1,8 @@
 #include "savingthread.h"
 
 SavingThread::SavingThread(ImagesSupplier *is, KeyingParameters *kp)
-    : KeyingThread(is, kp)
+//    : KeyingThread(is, kp)
+    : KeyingThread(is, new KeyingParameters(kp))
 {
 }
 

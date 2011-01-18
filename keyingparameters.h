@@ -35,6 +35,9 @@ public:
                      int black,
                      int ys,
                      bool matteVisible);
+    KeyingParameters(KeyingParameters& other);
+    KeyingParameters(KeyingParameters* other);
+
     KeyingAlgorithm getKeyingAlgorithm() {QMutexLocker locker(&mutex); return keyingAlgorithm; }
     QColor getColor() {QMutexLocker locker(&mutex); return QColor(color); }
     int getHue() {QMutexLocker locker(&mutex); return hue; }

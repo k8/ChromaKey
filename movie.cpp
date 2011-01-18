@@ -60,6 +60,9 @@ MovieSaver::MovieSaver(const QString &file, Movie *movie, Size size)
     int fourcc = movie->getFOURCC();
     if (fourcc ==  CV_FOURCC('M','J','P','G'))
         fourcc = CV_FOURCC('F', 'L', 'V', '1');
+    if (fourcc ==  875967048)
+        fourcc = CV_FOURCC('F', 'L', 'V', '1');
+    qDebug() << fourcc;
     videoWriter.open(file.toStdString(), fourcc, movie->getFPS(), size);
 }
 
