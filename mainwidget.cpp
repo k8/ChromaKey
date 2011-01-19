@@ -27,10 +27,10 @@ MainWidget::MainWidget(QWidget *parent) :
                                             ui->hueSlider->value(),
                                             ui->saturationSlider->value(),
                                             ui->valueSlider->value(),
-                                            ui->alphaSlider->value(),
+                                            1,
                                             ui->dmSlider->value(),
                                             ui->dmSlider2->value(),
-                                            ui->ysSlider->value(),
+                                            1,
                                             ui->showDmBox->isChecked(),
                                             ui->despillBox->isChecked());
     initColorNames();
@@ -44,6 +44,10 @@ MainWidget::MainWidget(QWidget *parent) :
     setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
     changeColor(color);
     showMovieMenu(false);
+
+    ui->secondColorBox->setVisible(false);
+    ui->label_3->setVisible(false);
+
 
     keyingThread->start();
 }
@@ -99,12 +103,10 @@ void MainWidget::connectObjects()
     connect(ui->saturationSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setSaturation(int)));
     connect(ui->valueSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setValue(int)));
 
-    connect(ui->alphaSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setAlpha(int)));
 
     connect(ui->dmSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setWhite(int)));
     connect(ui->dmSlider2, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setBlack(int)));
 
-    connect(ui->ysSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setYs(int)));
 
     connect(ui->showDmBox, SIGNAL(toggled(bool)), keyingParameters, SLOT(setMatteVisible(bool)));
     connect(ui->despillBox, SIGNAL(toggled(bool)), keyingParameters, SLOT(setDespill(bool)));
@@ -185,6 +187,24 @@ void MainWidget::initColorNames()
     colorsList.push_back("Blue");
     colorCodes[i] = KeyingParameters::C_BLUE;
     colorIndexes[KeyingParameters::C_BLUE] = i++;
+    colorsList.push_back("Cyan blue");
+    colorCodes[i] = KeyingParameters::C_CYAN_BLUE;
+    colorIndexes[KeyingParameters::C_CYAN_BLUE] = i++;
+    colorsList.push_back("Magenta blue");
+    colorCodes[i] = KeyingParameters::C_MAGENTA_BLUE;
+    colorIndexes[KeyingParameters::C_MAGENTA_BLUE] = i++;
+    colorsList.push_back("Yellow red");
+    colorCodes[i] = KeyingParameters::C_YELLOW_RED;
+    colorIndexes[KeyingParameters::C_YELLOW_RED] = i++;
+    colorsList.push_back("Cyan green");
+    colorCodes[i] = KeyingParameters::C_CYAN_GREEN;
+    colorIndexes[KeyingParameters::C_CYAN_GREEN] = i++;
+    colorsList.push_back("Magenta red");
+    colorCodes[i] = KeyingParameters::C_MAGENTA_RED;
+    colorIndexes[KeyingParameters::C_MAGENTA_RED] = i++;
+    colorsList.push_back("Yellow green");
+    colorCodes[i] = KeyingParameters::C_YELLOW_GREEN;
+    colorIndexes[KeyingParameters::C_YELLOW_GREEN] = i++;
 
     ui->mainColorBox->addItems(colorsList);
 
@@ -234,7 +254,7 @@ void MainWidget::on_playPauseButton_clicked()
 
 void MainWidget::on_fgButton_clicked()
 {    
-    QString file = QFileDialog::getOpenFileName(this, "Open foreground file", filesPath, "Movies (*.avi);;Images (*.jpg)");
+    QString file = QFileDialog::getOpenFileName(this, "Open foreground file", filesPath, "Images (*.jpg);;Movies (*.avi)");
     if (file != QString())
     {
         openFile(file, true);
@@ -243,7 +263,7 @@ void MainWidget::on_fgButton_clicked()
 
 void MainWidget::on_bgButton_clicked()
 {
-    QString file = QFileDialog::getOpenFileName(this, "Open background file", filesPath, "Movies (*.avi);;Images (*.jpg)");
+    QString file = QFileDialog::getOpenFileName(this, "Open background file", filesPath, "Images (*.jpg);;Movies (*.avi)");
     if (file != QString())
     {
         openFile(file, false);
@@ -258,7 +278,7 @@ void MainWidget::on_colorButton_clicked()
 
 void MainWidget::on_saveButton_clicked()
 {
-    QString filter = "Movies (*.avi);;Images (*.jpg)";
+    QString filter = "Images (*.jpg);;Movies (*.avi)";
     if (! imagesSupplier->isMovie())
     {
         filter = "Images (*.jpg)";

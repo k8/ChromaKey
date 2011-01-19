@@ -12,6 +12,7 @@ protected:
     void computeMatte();
     void despill();
     void setIndexes(int& a, int& b, int& c);
+    void setIndexesDespill(int& a, int& b, int& c);
 };
 
 #endif // DIFFERENCEKEYER_H

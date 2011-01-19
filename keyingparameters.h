@@ -22,6 +22,12 @@ public:
         C_RED,
         C_GREEN,
         C_BLUE,
+        C_CYAN_GREEN,
+        C_CYAN_BLUE,
+        C_MAGENTA_RED,
+        C_MAGENTA_BLUE,
+        C_YELLOW_RED,
+        C_YELLOW_GREEN,
         C_MAX
     };
 

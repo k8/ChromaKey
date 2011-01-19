@@ -152,8 +152,33 @@ void KeyingParameters::setColors(QColor color)
     qSort(list);
     firstColor = list.at(0).index;
     secondColor = C_MAX;
-    qDebug() << color.red() << color.green() << color.blue();
-    qDebug() << list.at(0).value << list.at(1).value << list.at(2).value;
-    if (abs(list.at(0).value-list.at(1).value) < 20)
+//    qDebug() << color.red() << color.green() << color.blue();
+//    qDebug() << list.at(0).value << list.at(1).value << list.at(2).value;
+    if (abs(list.at(0).value-list.at(1).value) < 50)
+    {
+        ColorName first = list.at(0).index;
+        ColorName second = list.at(1).index;
+        if (first == C_RED)
+        {
+            if (second == C_BLUE)
+                firstColor = C_MAGENTA_RED;
+            if (second == C_GREEN)
+                firstColor = C_YELLOW_RED;
+        }
+        if (first == C_BLUE)
+        {
+            if (second == C_RED)
+                firstColor = C_MAGENTA_BLUE;
+            if (second == C_GREEN)
+                firstColor = C_CYAN_BLUE;
+        }
+        if (first == C_GREEN)
+        {
+            if (second == C_BLUE)
+                firstColor = C_CYAN_GREEN;
+            if (second == C_RED)
+                firstColor = C_YELLOW_GREEN;
+        }
+    }
         secondColor = list.at(2).index;
 }
