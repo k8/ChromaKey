@@ -51,6 +51,8 @@ DifferenceMatte::DifferenceMatte(Size size)
 
 void DifferenceMatte::compute(const Mat &img, int a, int b, int c)
 {
+    QColor color;
+
     for (int i=0; i<img.rows; i++)
     {
         for (int j=0; j<img.cols; j++)
@@ -58,7 +60,7 @@ void DifferenceMatte::compute(const Mat &img, int a, int b, int c)
             Vec3b elem = img.at<Vec3b>(i,j);
             int value = elem[a]-max(elem[b], elem[c]);
             if (value < 0) value = 0;
-            mat.at<uchar>(i, j) = value;
+            mat.at<uchar>(i, j) = value;            
         }
     }
 }

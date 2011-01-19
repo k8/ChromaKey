@@ -1,5 +1,6 @@
 #include "differencekeyer.h"
 
+#include <QDebug>
 #include <QMap>
 
 DifferenceKeyer::DifferenceKeyer()
@@ -21,6 +22,30 @@ void DifferenceKeyer::computeMatte()
         }
     }
     matte->scale(kp->getWhite(), kp->getBlack());
+    if (kp->getDespill())
+    {
+        despill();
+    }
+}
+
+void DifferenceKeyer::despill()
+{
+    for (int i=0; i<fg.rows; i++)
+    {
+        for (int j=0; j<fg.cols; j++)
+        {
+            Vec3b& elem = fg.at<Vec3b>(i,j);
+            if (elem[1] > elem[2])
+            {
+                elem[1] = elem[2];
+            }
+            if (elem[0] > elem[2])
+            {
+                elem[0] = elem[2];
+            }
+        }
+    }
+    double n = fg.rows*fg.cols;
 }
 
 void DifferenceKeyer::setIndexes(int& a, int& b, int& c)

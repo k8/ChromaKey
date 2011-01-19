@@ -14,6 +14,15 @@ ImagesSupplier::ImagesSupplier(QRgb c, QSize size)
     bgPic = new Image(imSize, c);
 }
 
+ImagesSupplier::~ImagesSupplier()
+{
+    if (saver)
+    {
+        delete saver;
+    }
+
+}
+
 void ImagesSupplier::init(const QString &fgFile, const QString &bgFile)
 {
     openForeground(fgFile);

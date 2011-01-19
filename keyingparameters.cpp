@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QList>
 
-KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, int hue, int saturation, int value, int alpha, int white, int black, int ys, bool matteVisible)
+KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, int hue, int saturation, int value, int alpha, int white, int black, int ys, bool matteVisible, bool despill)
     :
     keyingAlgorithm(keyingAlgorithm),
     color(color),
@@ -14,7 +14,8 @@ KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, 
     white(white),
     black(black),
     ys(ys),
-    matteVisible(matteVisible)
+    matteVisible(matteVisible),
+    despill(despill)
 {
 }
 
@@ -30,6 +31,7 @@ KeyingParameters::KeyingParameters(KeyingParameters &other)
     black = other.getBlack();
     ys = other.getYs();
     matteVisible = other.isMatteVisible();
+    despill = other.despill;
 }
 
 KeyingParameters::KeyingParameters(KeyingParameters* other)
@@ -46,6 +48,7 @@ KeyingParameters::KeyingParameters(KeyingParameters* other)
     matteVisible = other->isMatteVisible();
     firstColor = other->getFirstColor();
     secondColor = other->getSecondColor();
+    despill = other->despill;
 }
 
 void KeyingParameters::setKeyingAlgorithm(KeyingAlgorithm ka)
@@ -116,6 +119,13 @@ void KeyingParameters::setMatteVisible(bool v)
 {
     QMutexLocker locker(&mutex);
     matteVisible = v;
+    emit parameterChanged();
+}
+
+void KeyingParameters::setDespill(bool d)
+{
+    QMutexLocker locker(&mutex);
+    despill = d;
     emit parameterChanged();
 }
 

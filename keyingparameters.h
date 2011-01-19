@@ -34,7 +34,8 @@ public:
                      int white,
                      int black,
                      int ys,
-                     bool matteVisible);
+                     bool matteVisible,
+                     bool despill);
     KeyingParameters(KeyingParameters& other);
     KeyingParameters(KeyingParameters* other);
 
@@ -48,6 +49,7 @@ public:
     int getBlack() {QMutexLocker locker(&mutex); return black; }
     int getYs() {QMutexLocker locker(&mutex); return ys; }
     bool isMatteVisible() {QMutexLocker locker(&mutex); return matteVisible; }
+    bool getDespill() {QMutexLocker locker(&mutex); return despill; }
     ColorName getFirstColor() {QMutexLocker locker(&mutex); return firstColor; }
     ColorName getSecondColor() {QMutexLocker locker(&mutex); return secondColor; }
 
@@ -62,6 +64,7 @@ public slots:
     void setBlack(int b);
     void setYs(int ys);
     void setMatteVisible(bool v);
+    void setDespill(bool d);
     void setFirstColor(ColorName color);
     void setSecondColor(ColorName color);
     void setColors(QColor color);
@@ -92,6 +95,7 @@ private:
     int black;
     int ys;
     bool matteVisible;
+    bool despill;
     ColorName firstColor;
     ColorName secondColor;
     QMutex mutex;

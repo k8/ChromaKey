@@ -31,7 +31,8 @@ MainWidget::MainWidget(QWidget *parent) :
                                             ui->dmSlider->value(),
                                             ui->dmSlider2->value(),
                                             ui->ysSlider->value(),
-                                            ui->showDmBox->isChecked());
+                                            ui->showDmBox->isChecked(),
+                                            ui->despillBox->isChecked());
     initColorNames();
     ImagesProcessor* imagesProcessor = new ImagesProcessor(movieSize);
     keyingThread = new RealTimeThread(imagesSupplier, imagesProcessor, keyingParameters);
@@ -106,7 +107,7 @@ void MainWidget::connectObjects()
     connect(ui->ysSlider, SIGNAL(valueChanged(int)), keyingParameters, SLOT(setYs(int)));
 
     connect(ui->showDmBox, SIGNAL(toggled(bool)), keyingParameters, SLOT(setMatteVisible(bool)));
-
+    connect(ui->despillBox, SIGNAL(toggled(bool)), keyingParameters, SLOT(setDespill(bool)));
 }
 
 void MainWidget::setForegroundIcon(const QImage& img)

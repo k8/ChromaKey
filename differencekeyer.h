@@ -10,6 +10,7 @@ public:
 
 protected:
     void computeMatte();
+    void despill();
     void setIndexes(int& a, int& b, int& c);
 };
 

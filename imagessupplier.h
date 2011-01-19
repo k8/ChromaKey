@@ -19,6 +19,7 @@ class ImagesSupplier : public QObject
 
 public:
     ImagesSupplier(QRgb color = 0, QSize size = QSize(0, 0));
+    ~ImagesSupplier();
     void init(const QString& fgFile, const QString& bgFile);
 
     bool openForeground(const QString& file);

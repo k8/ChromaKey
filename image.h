@@ -6,6 +6,7 @@
 #include <QImage>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <QDebug>
 using namespace cv;
 
 #include "imagesprocessor.h"
@@ -38,6 +39,7 @@ class ImageSaver
 {
 public:
     ImageSaver(const QString& file);
+    virtual ~ImageSaver() {}
     virtual bool save(const Mat& image);
     virtual int getProgress() { return 100;}
 protected:

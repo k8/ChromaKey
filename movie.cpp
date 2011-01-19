@@ -66,6 +66,10 @@ MovieSaver::MovieSaver(const QString &file, Movie *movie, Size size)
     videoWriter.open(file.toStdString(), fourcc, movie->getFPS(), size);
 }
 
+MovieSaver::~MovieSaver()
+{
+}
+
 bool MovieSaver::save(const Mat &image)
 {
     Mat frame = image;
