@@ -2,22 +2,35 @@
 #include <QDebug>
 
 Movie::Movie(const QString &file)
-    : finished(false)
+    : capture(0), finished(false)
 {
-    VideoCapture tmp;
-    opened = tmp.open(file.toStdString());
+    VideoCapture* tmp = new VideoCapture();
+    opened = tmp->open(file.toStdString());
     if (opened)
     {
         capture = tmp;
         this->file = file;
         get(true);
     }
+    else
+    {
+        delete tmp;
+    }
 }
 
 Movie::Movie(const Movie &other)
+    : Image()
 {
-    capture = capture;
-    finished = finished;
+    capture = other.capture;
+    finished = other.finished;
+}
+
+Movie::~Movie()
+{
+    if (capture)
+    {
+        delete capture;
+    }
 }
 
 const Mat& Movie::get(bool next)
@@ -31,8 +44,8 @@ const Mat& Movie::get(bool next)
 
 void Movie::setProgress(int p)
 {
-    int fpp = capture.get(CV_CAP_PROP_FRAME_COUNT)/100.0;
-    capture.set(CV_CAP_PROP_POS_FRAMES, fpp*p);
+    int fpp = capture->get(CV_CAP_PROP_FRAME_COUNT)/100.0;
+    capture->set(CV_CAP_PROP_POS_FRAMES, fpp*p);
     getFrame();
 }
 
@@ -41,7 +54,7 @@ bool Movie::getFrame()
     Mat frame;
     try
     {
-        if (capture.grab() && capture.retrieve(frame))
+        if (capture->grab() && capture->retrieve(frame))
         {
             frame.copyTo(image);
             return true;

@@ -18,6 +18,7 @@ public:
     Image(const QString&);
     Image(const Size& size, const QRgb& color);
     Image(const Image& other);
+    virtual ~Image() {}
     Size getSize() {return image.size();}
     virtual const Mat& get(bool next);
     virtual QImage getResizedQImage(const QSize& size);

@@ -18,6 +18,7 @@ KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, 
 }
 
 KeyingParameters::KeyingParameters(KeyingParameters &other)
+    : QObject()
 {
     keyingAlgorithm = other.getKeyingAlgorithm();
     color = other.getColor().rgb();
@@ -28,20 +29,6 @@ KeyingParameters::KeyingParameters(KeyingParameters &other)
     black = other.getBlack();
     matteVisible = other.isMatteVisible();
     despill = other.despill;
-}
-
-KeyingParameters::KeyingParameters(KeyingParameters* other)
-{
-    keyingAlgorithm = other->getKeyingAlgorithm();
-    color = other->getColor().rgb();
-    hue = other->getHue();
-    saturation = other->getSaturation();
-    value = other->getValue();
-    white = other->getWhite();
-    black = other->getBlack();
-    matteVisible = other->isMatteVisible();
-    firstColor = other->getFirstColor();
-    despill = other->despill;
 }
 
 void KeyingParameters::setKeyingAlgorithm(KeyingAlgorithm ka)

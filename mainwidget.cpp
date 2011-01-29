@@ -240,12 +240,12 @@ void MainWidget::initColorNames()
 
 KeyingParameters::KeyingAlgorithm MainWidget::algorithmName(int index)
 {
-
-    switch (index)
+    if (index == 0)
     {
-    case 0:
         return KeyingParameters::KA_HSV;
-    case 1:
+    }
+    else
+    {
         return KeyingParameters::KA_DM;
     }
 }

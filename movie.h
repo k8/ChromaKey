@@ -9,22 +9,23 @@ class Movie : public Image
 public:
     Movie(const QString& file);
     Movie(const Movie& other);
+    ~Movie();
     const Mat& get(bool next);
     bool isMovie()
     {
         return true;
     }
     bool isFinished() {return finished;}
-    int getFPS() {return capture.get(CV_CAP_PROP_FPS);}
-    int getFOURCC() {return capture.get(CV_CAP_PROP_FOURCC);}
-    int getProgress() { return round(capture.get(CV_CAP_PROP_POS_AVI_RATIO)*100.0); }
+    int getFPS() {return capture->get(CV_CAP_PROP_FPS);}
+    int getFOURCC() {return capture->get(CV_CAP_PROP_FOURCC);}
+    int getProgress() { return round(capture->get(CV_CAP_PROP_POS_AVI_RATIO)*100.0); }
     void setProgress(int p);
 
 protected:
     bool getFrame();
 
 private:
-    VideoCapture capture;
+    VideoCapture* capture;
     bool finished;
 };
 

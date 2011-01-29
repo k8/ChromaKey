@@ -24,6 +24,7 @@ Image::Image(const Size& size, const QRgb& color)
 }
 
 Image::Image(const Image &other)
+    : QObject()
 {
     image = other.image;
     opened = other.opened;
