@@ -20,7 +20,6 @@ SOURCES += main.cpp \
     matte.cpp \
     keyer.cpp \
     hsvkeyer.cpp \
-    anglekeyer.cpp \
     differencekeyer.cpp \
     keyerfactory.cpp \
     movieslider.cpp
@@ -40,7 +39,6 @@ HEADERS += mainwidget.h \
     matte.h \
     keyer.h \
     hsvkeyer.h \
-    anglekeyer.h \
     differencekeyer.h \
     keyerfactory.h \
     movieslider.h

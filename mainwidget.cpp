@@ -7,6 +7,8 @@
 #include <QColorDialog>
 #include <QColor>
 #include <QMessageBox>
+#include <QIcon>
+#include <QPixmap>
 
 #include "imagesprocessor.h"
 #include "filesavingdialog.h"
@@ -27,10 +29,8 @@ MainWidget::MainWidget(QWidget *parent) :
                                             ui->hueSlider->value(),
                                             ui->saturationSlider->value(),
                                             ui->valueSlider->value(),
-                                            1,
                                             ui->dmSlider->value(),
                                             ui->dmSlider2->value(),
-                                            1,
                                             ui->showDmBox->isChecked(),
                                             ui->despillBox->isChecked());
     initColorNames();
@@ -44,10 +44,6 @@ MainWidget::MainWidget(QWidget *parent) :
     setBackgroundIcon(imagesSupplier->getBackgroundIcon(ui->bgButton->size()));
     changeColor(color);
     showMovieMenu(false);
-
-    ui->secondColorBox->setVisible(false);
-    ui->label_3->setVisible(false);
-
 
     keyingThread->start();
 }
@@ -176,42 +172,70 @@ void MainWidget::showOpenFailMessage(const QString &file)
 
 void MainWidget::initColorNames()
 {
+    QPixmap pix(20, 20);
+    QList<QIcon> icons;
     QStringList colorsList;
     int i = 0;
-    colorsList.push_back("Red");
+
+    colorsList.push_back("");
     colorCodes[i] = KeyingParameters::C_RED;
     colorIndexes[KeyingParameters::C_RED] = i++;
-    colorsList.push_back("Green");
-    colorCodes[i] = KeyingParameters::C_GREEN;
-    colorIndexes[KeyingParameters::C_GREEN] = i++;
-    colorsList.push_back("Blue");
-    colorCodes[i] = KeyingParameters::C_BLUE;
-    colorIndexes[KeyingParameters::C_BLUE] = i++;
-    colorsList.push_back("Cyan blue");
-    colorCodes[i] = KeyingParameters::C_CYAN_BLUE;
-    colorIndexes[KeyingParameters::C_CYAN_BLUE] = i++;
-    colorsList.push_back("Magenta blue");
-    colorCodes[i] = KeyingParameters::C_MAGENTA_BLUE;
-    colorIndexes[KeyingParameters::C_MAGENTA_BLUE] = i++;
-    colorsList.push_back("Yellow red");
+    pix.fill(QColor(255, 0, 0));
+    icons.push_back(QIcon(pix));
+
+    colorsList.push_back("");
     colorCodes[i] = KeyingParameters::C_YELLOW_RED;
     colorIndexes[KeyingParameters::C_YELLOW_RED] = i++;
-    colorsList.push_back("Cyan green");
-    colorCodes[i] = KeyingParameters::C_CYAN_GREEN;
-    colorIndexes[KeyingParameters::C_CYAN_GREEN] = i++;
-    colorsList.push_back("Magenta red");
-    colorCodes[i] = KeyingParameters::C_MAGENTA_RED;
-    colorIndexes[KeyingParameters::C_MAGENTA_RED] = i++;
-    colorsList.push_back("Yellow green");
+    pix.fill(QColor(255, 125, 0));
+    icons.push_back(QIcon(pix));
+
+    colorsList.push_back("");
     colorCodes[i] = KeyingParameters::C_YELLOW_GREEN;
     colorIndexes[KeyingParameters::C_YELLOW_GREEN] = i++;
+    pix.fill(QColor(125, 255, 0));
+    icons.push_back(QIcon(pix));
+
+    colorsList.push_back("");
+    colorCodes[i] = KeyingParameters::C_GREEN;
+    colorIndexes[KeyingParameters::C_GREEN] = i++;
+    pix.fill(QColor(0, 255, 0));
+    icons.push_back(QIcon(pix));
+
+    colorsList.push_back("");
+    colorCodes[i] = KeyingParameters::C_CYAN_GREEN;
+    colorIndexes[KeyingParameters::C_CYAN_GREEN] = i++;
+    pix.fill(QColor(0, 255, 125));
+    icons.push_back(QIcon(pix));
+
+    colorsList.push_back("");
+    colorCodes[i] = KeyingParameters::C_CYAN_BLUE;
+    colorIndexes[KeyingParameters::C_CYAN_BLUE] = i++;
+    pix.fill(QColor(0, 125, 255));
+    icons.push_back(QIcon(pix));
+
+    colorsList.push_back("");
+    colorCodes[i] = KeyingParameters::C_BLUE;
+    colorIndexes[KeyingParameters::C_BLUE] = i++;
+    pix.fill(QColor(0, 0, 255));
+    icons.push_back(QIcon(pix));
+
+    colorsList.push_back("");
+    colorCodes[i] = KeyingParameters::C_MAGENTA_BLUE;
+    colorIndexes[KeyingParameters::C_MAGENTA_BLUE] = i++;
+    pix.fill(QColor(125, 0, 255));
+    icons.push_back(QIcon(pix));
+
+    colorsList.push_back("");
+    colorCodes[i] = KeyingParameters::C_MAGENTA_RED;
+    colorIndexes[KeyingParameters::C_MAGENTA_RED] = i++;
+    pix.fill(QColor(255, 0, 125));
+    icons.push_back(QIcon(pix));
 
     ui->mainColorBox->addItems(colorsList);
-
-    colorsList.push_back("Maximum");
-    colorCodes[i] = KeyingParameters::C_MAX;
-    colorIndexes[KeyingParameters::C_MAX] = i++;
-    ui->secondColorBox->addItems(colorsList);
+    for (int i = 0; i < icons.size(); i++)
+    {
+        ui->mainColorBox->setItemIcon(i, icons[i]);
+    }
 }
 
 KeyingParameters::KeyingAlgorithm MainWidget::algorithmName(int index)
@@ -223,8 +247,6 @@ KeyingParameters::KeyingAlgorithm MainWidget::algorithmName(int index)
         return KeyingParameters::KA_HSV;
     case 1:
         return KeyingParameters::KA_DM;
-    case 2:
-        return KeyingParameters::KA_YCbCr;
     }
 }
 
@@ -304,19 +326,10 @@ void MainWidget::shiftMovie()
 
 void MainWidget::updateColorCodes()
 {
-    qDebug() << "first index: " << colorIndexes[keyingParameters->getFirstColor()];
-    qDebug() << "second index: " << colorIndexes[keyingParameters->getSecondColor()];
-
     ui->mainColorBox->setCurrentIndex(colorIndexes[keyingParameters->getFirstColor()]);
-    ui->secondColorBox->setCurrentIndex(colorIndexes[keyingParameters->getSecondColor()]);
 }
 
 void MainWidget::on_mainColorBox_currentIndexChanged(int index)
 {
     keyingParameters->setFirstColor(colorCodes[index]);
-}
-
-void MainWidget::on_secondColorBox_currentIndexChanged(int index)
-{
-    keyingParameters->setSecondColor(colorCodes[index]);
 }

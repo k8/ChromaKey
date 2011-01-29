@@ -258,6 +258,9 @@
              <string>Color Difference</string>
             </attribute>
             <layout class="QFormLayout" name="formLayout_4">
+             <property name="fieldGrowthPolicy">
+              <enum>QFormLayout::ExpandingFieldsGrow</enum>
+             </property>
              <item row="1" column="0">
               <widget class="QLabel" name="label_4">
                <property name="text">
@@ -305,20 +308,10 @@
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
-              <widget class="QComboBox" name="secondColorBox"/>
-             </item>
              <item row="3" column="1">
               <widget class="QComboBox" name="mainColorBox"/>
              </item>
              <item row="5" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>Second Color:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="0">
               <widget class="QCheckBox" name="despillBox">
                <property name="text">
                 <string>Despill</string>

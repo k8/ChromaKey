@@ -46,7 +46,6 @@ private:
     QMap<KeyingParameters::ColorName, int> colorIndexes;
 
 private slots:
-    void on_secondColorBox_currentIndexChanged(int index);
     void on_mainColorBox_currentIndexChanged(int index);
     void on_tabWidget_currentChanged(int index);
     void showMovieMenu(bool show);

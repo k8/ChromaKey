@@ -3,17 +3,15 @@
 #include <QDebug>
 #include <QList>
 
-KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, int hue, int saturation, int value, int alpha, int white, int black, int ys, bool matteVisible, bool despill)
+KeyingParameters::KeyingParameters(KeyingAlgorithm keyingAlgorithm, QRgb color, int hue, int saturation, int value, int white, int black, bool matteVisible, bool despill)
     :
     keyingAlgorithm(keyingAlgorithm),
     color(color),
     hue(hue),
     saturation(saturation),
     value(value),
-    alpha(alpha),
     white(white),
     black(black),
-    ys(ys),
     matteVisible(matteVisible),
     despill(despill)
 {
@@ -26,10 +24,8 @@ KeyingParameters::KeyingParameters(KeyingParameters &other)
     hue = other.getHue();
     saturation = other.getSaturation();
     value = other.getValue();
-    alpha = other.getAlpha();
     white = other.getWhite();
     black = other.getBlack();
-    ys = other.getYs();
     matteVisible = other.isMatteVisible();
     despill = other.despill;
 }
@@ -41,13 +37,10 @@ KeyingParameters::KeyingParameters(KeyingParameters* other)
     hue = other->getHue();
     saturation = other->getSaturation();
     value = other->getValue();
-    alpha = other->getAlpha();
     white = other->getWhite();
     black = other->getBlack();
-    ys = other->getYs();
     matteVisible = other->isMatteVisible();
     firstColor = other->getFirstColor();
-    secondColor = other->getSecondColor();
     despill = other->despill;
 }
 
@@ -87,13 +80,6 @@ void KeyingParameters::setValue(int v)
     emit parameterChanged();
 }
 
-void KeyingParameters::setAlpha(int a)
-{
-    QMutexLocker locker(&mutex);
-    alpha = a;
-    emit parameterChanged();
-}
-
 void KeyingParameters::setWhite(int w)
 {
     QMutexLocker locker(&mutex);
@@ -105,13 +91,6 @@ void KeyingParameters::setBlack(int b)
 {
     QMutexLocker locker(&mutex);
     black = b;
-    emit parameterChanged();
-}
-
-void KeyingParameters::setYs(int ys)
-{
-    QMutexLocker locker(&mutex);
-    this->ys = ys;
     emit parameterChanged();
 }
 
@@ -136,13 +115,6 @@ void KeyingParameters::setFirstColor(ColorName color)
     emit parameterChanged();
 }
 
-void KeyingParameters::setSecondColor(ColorName color)
-{
-    QMutexLocker locker(&mutex);
-    secondColor = color;
-    emit parameterChanged();
-}
-
 void KeyingParameters::setColors(QColor color)
 {
     QList<Color> list;
@@ -151,9 +123,6 @@ void KeyingParameters::setColors(QColor color)
     list.append(Color(color.blue(), C_BLUE));
     qSort(list);
     firstColor = list.at(0).index;
-    secondColor = C_MAX;
-//    qDebug() << color.red() << color.green() << color.blue();
-//    qDebug() << list.at(0).value << list.at(1).value << list.at(2).value;
     if (abs(list.at(0).value-list.at(1).value) < 50)
     {
         ColorName first = list.at(0).index;
@@ -180,5 +149,4 @@ void KeyingParameters::setColors(QColor color)
                 firstColor = C_YELLOW_GREEN;
         }
     }
-        secondColor = list.at(2).index;
 }

@@ -58,7 +58,6 @@ void DifferenceKeyer::setIndexes(int& a, int& b, int& c)
     indexes[KeyingParameters::C_RED] = 2;
 
     KeyingParameters::ColorName firstColor = kp->getFirstColor();
-    KeyingParameters::ColorName secondColor = kp->getSecondColor();
 
     switch (firstColor)
     {
@@ -113,7 +112,6 @@ void DifferenceKeyer::setIndexes(int& a, int& b, int& c)
 void DifferenceKeyer::setIndexesDespill(int& a, int& b, int& c)
 {
     KeyingParameters::ColorName firstColor = kp->getFirstColor();
-    KeyingParameters::ColorName secondColor = kp->getSecondColor();
 
     switch (firstColor)
     {

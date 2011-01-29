@@ -14,8 +14,7 @@ public:
     enum KeyingAlgorithm
     {
         KA_HSV,
-        KA_DM,
-        KA_YCbCr,
+        KA_DM
     };
     enum ColorName
     {
@@ -27,8 +26,7 @@ public:
         C_MAGENTA_RED,
         C_MAGENTA_BLUE,
         C_YELLOW_RED,
-        C_YELLOW_GREEN,
-        C_MAX
+        C_YELLOW_GREEN
     };
 
     KeyingParameters(KeyingAlgorithm keyingAlgorithm,
@@ -36,10 +34,8 @@ public:
                      int hue,
                      int saturation,
                      int value,
-                     int alpha,
                      int white,
                      int black,
-                     int ys,
                      bool matteVisible,
                      bool despill);
     KeyingParameters(KeyingParameters& other);
@@ -50,14 +46,11 @@ public:
     int getHue() {QMutexLocker locker(&mutex); return hue; }
     int getSaturation() {QMutexLocker locker(&mutex); return saturation; }
     int getValue() {QMutexLocker locker(&mutex); return value; }
-    int getAlpha() {QMutexLocker locker(&mutex); return alpha;}
     int getWhite() {QMutexLocker locker(&mutex); return white; }
     int getBlack() {QMutexLocker locker(&mutex); return black; }
-    int getYs() {QMutexLocker locker(&mutex); return ys; }
     bool isMatteVisible() {QMutexLocker locker(&mutex); return matteVisible; }
     bool getDespill() {QMutexLocker locker(&mutex); return despill; }
     ColorName getFirstColor() {QMutexLocker locker(&mutex); return firstColor; }
-    ColorName getSecondColor() {QMutexLocker locker(&mutex); return secondColor; }
 
 public slots:
     void setKeyingAlgorithm(KeyingAlgorithm ka);
@@ -65,14 +58,11 @@ public slots:
     void setHue(int h);
     void setSaturation(int s);
     void setValue(int v);
-    void setAlpha(int a);
     void setWhite(int w);
     void setBlack(int b);
-    void setYs(int ys);
     void setMatteVisible(bool v);
     void setDespill(bool d);
     void setFirstColor(ColorName color);
-    void setSecondColor(ColorName color);
     void setColors(QColor color);
 
 signals:
@@ -96,14 +86,11 @@ private:
     int hue;
     int saturation;
     int value;
-    int alpha;
     int white;
     int black;
-    int ys;
     bool matteVisible;
     bool despill;
     ColorName firstColor;
-    ColorName secondColor;
     QMutex mutex;
 };
 
